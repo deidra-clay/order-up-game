@@ -1,12 +1,12 @@
 {
   "name": "Order Up!",
   "short_name": "Order Up!",
-  "description": "A fast-paced restaurant time-management game where you cook, serve, seat customers, and survive the rush.",
+  "description": "A fast-paced restaurant time-management game where you seat customers, serve tables, cook food, and survive the rush.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#f8ead3",
-  "theme_color": "#f6d9a9",
+  "background_color": "#1f1712",
+  "theme_color": "#f2c978",
   "orientation": "portrait",
   "icons": [
     {
