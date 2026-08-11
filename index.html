@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
+  <meta name="theme-color" content="#f6d9a9" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="Order Up!" />
+  <title>Order Up!</title>
+  <link rel="manifest" href="./manifest.json" />
+  <link rel="icon" href="./icon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+  <main id="app">
+    <header class="hud">
+      <div class="brand-block">
+        <span class="eyebrow">ORDER UP!</span>
+        <strong id="levelLabel">Level 1</strong>
+      </div>
+      <div class="hud-stat"><span>💵</span><strong id="cashLabel">$0</strong></div>
+      <div class="hud-stat"><span>⭐</span><strong id="goalLabel">$0 / $80</strong></div>
+    </header>
+
+    <section class="status-strip">
+      <div id="message">Tap Start Shift when you're ready.</div>
+      <button id="soundButton" class="icon-button" aria-label="Toggle sound">🔊</button>
+    </section>
+
+    <section class="game-board">
+      <section class="zone waiting-zone">
+        <div class="zone-title">
+          <h2>Waiting</h2>
+          <span id="queueCount">0</span>
+        </div>
+        <div id="queue" class="queue"></div>
+      </section>
+
+      <section class="zone dining-zone">
+        <div class="zone-title">
+          <h2>Dining Room</h2>
+          <span>Seat • order • serve • pay • clean</span>
+        </div>
+        <div id="tables" class="tables"></div>
+      </section>
+
+      <section class="zone kitchen-zone">
+        <div class="zone-title">
+          <h2>Kitchen</h2>
+          <span>Tap to cook. Tap READY food to collect.</span>
+        </div>
+        <div id="stations" class="stations"></div>
+      </section>
+
+      <section class="zone tray-zone">
+        <div class="zone-title">
+          <h2>Your Tray</h2>
+          <span>Select food, then tap its table.</span>
+        </div>
+        <div id="tray" class="tray"></div>
+      </section>
+    </section>
+
+    <footer class="footer-bar">
+      <button id="levelButton" class="secondary-button">Levels</button>
+      <button id="startButton" class="primary-button">Start Shift</button>
+    </footer>
+  </main>
+
+  <div id="modal" class="modal open" role="dialog" aria-modal="true">
+    <div class="modal-card">
+      <div id="modalIcon" class="modal-icon">🍽️</div>
+      <h1 id="modalTitle">Order Up!</h1>
+      <p id="modalText">You run the whole diner. Seat customers, take orders, cook, serve, collect payment, and clean the tables.</p>
+      <div id="modalDetails" class="modal-details"></div>
+      <button id="modalPrimary" class="primary-button">Play Level 1</button>
+      <button id="modalSecondary" class="secondary-button hidden">Choose Level</button>
+    </div>
+  </div>
+
+  <template id="customerTemplate">
+    <button class="customer-card">
+      <div class="customer-avatar"></div>
+      <div class="customer-copy">
+        <strong class="customer-name"></strong>
+        <span class="customer-status"></span>
+        <div class="patience-track"><div class="patience-fill"></div></div>
+      </div>
+    </button>
+  </template>
+
+  <script src="./game.js"></script>
+</body>
+</html>
