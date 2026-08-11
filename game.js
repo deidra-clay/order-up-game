@@ -25,22 +25,22 @@ const LEVELS = [
 ];
 
 const TABLE_LAYOUTS = {
-  2:[{x:35,y:24},{x:66,y:43}],
-  3:[{x:34,y:22},{x:67,y:23},{x:52,y:45}],
-  4:[{x:31,y:21},{x:68,y:21},{x:31,y:45},{x:68,y:45}]
+  2:[{x:36,y:22},{x:66,y:22}],
+  3:[{x:31,y:21},{x:56,y:21},{x:80,y:21}],
+  4:[{x:31,y:20},{x:56,y:20},{x:80,y:20},{x:56,y:42}]
 };
 
 const STATION_POS = {
-  grill:{x:23,y:72,label:"GRILL"},
-  bun:{x:33,y:72,label:"BUN"},
-  lettuce:{x:43,y:72,label:"LETTUCE"},
-  tomato:{x:53,y:72,label:"TOMATO"},
-  cup:{x:23,y:84,label:"GRAB CUP"},
-  coffee:{x:33,y:84,label:"BREWER"},
-  fryer:{x:43,y:84,label:"FRYER"},
-  salt:{x:53,y:84,label:"SALT"},
-  griddle:{x:63,y:84,label:"GRIDDLE"},
-  syrup:{x:73,y:84,label:"SYRUP"}
+  grill:{x:22,y:71,label:"GRILL"},
+  bun:{x:31,y:71,label:"BUN"},
+  lettuce:{x:40,y:71,label:"LETTUCE"},
+  tomato:{x:49,y:71,label:"TOMATO"},
+  cup:{x:22,y:83,label:"GRAB CUP"},
+  coffee:{x:31,y:83,label:"BREWER"},
+  fryer:{x:40,y:83,label:"FRYER"},
+  salt:{x:49,y:83,label:"SALT"},
+  griddle:{x:58,y:83,label:"GRIDDLE"},
+  syrup:{x:67,y:83,label:"SYRUP"}
 };
 
 const NAMES=["Maya","Theo","Nina","Jay","Lena","Omar","Riley","Sam","Ari","Tess","Miles","Zoe","Kai","Ivy","Noah","Mina"];
@@ -96,8 +96,8 @@ function createState(levelIndex){
     levelIndex, running:false, ended:false, cash:0, spawned:0, resolved:0, nextId:1, nextSpawnAt:0, ordersTaken:0,
     selectedWaitingId:null, selectedCarrySlot:null, selectedBurgerSlot:0,
     waiting:[], pass:[], carry:[null,null],
-    server:{busy:false, x:31, y:50, token:0},
-    cook:{busy:false, x:51, y:73, token:0},
+    server:{busy:false, x:20, y:54, token:0},
+    cook:{busy:false, x:76, y:81, token:0},
     tables:layout.map((p,i)=>({ id:i+1, x:p.x, y:p.y, state:"empty", customer:null, order:[], served:[], eatingUntil:0, cleaningUntil:0 })),
     burgerSlots:[blankBurgerSlot(), blankBurgerSlot()],
     grill:{state:"idle", startedAt:0, readyAt:0, burnAt:0},
@@ -500,7 +500,7 @@ function onBurgerSlotTap(index){
   const slot = state.burgerSlots[index];
   if(burgerCanAssemble(slot)){
     const toppings = burgerToppingsFromSlot(slot);
-    moveWorker("cook", 76, 91, "Assemble burger", ()=>{
+    moveWorker("cook", 84, 84, "Assemble burger", ()=>{
       addToPass("burger", { toppings });
       state.burgerSlots[index] = blankBurgerSlot();
       beep(920);
@@ -597,7 +597,7 @@ function onSaltTap(){
 function onFriesPrepTap(){
   if(!state.running) return;
   if(state.fries.prep!=="salted"){ toast(state.fries.prep==="unsalted" ? "Salt the fries first." : "No fries are ready."); return; }
-  moveWorker("cook", 42, 94, "Portion fries", ()=>{
+  moveWorker("cook", 74, 84, "Portion fries", ()=>{
     addToPass("fries"); state.fries.prep="empty"; beep(920); toast("Fries sent to the pass.");
   }, 300);
 }
@@ -643,7 +643,7 @@ function onSyrupTap(){
 function onPancakePrepTap(){
   if(!state.running) return;
   if(state.pancakes.prep!=="syrup"){ toast(state.pancakes.prep==="plain" ? "Add syrup first." : "No pancake is ready."); return; }
-  moveWorker("cook", 58, 94, "Pancake to pass", ()=>{
+  moveWorker("cook", 74, 90, "Pancake to pass", ()=>{
     addToPass("pancakes"); state.pancakes.prep="empty"; beep(920); toast("Pancakes sent to the pass.");
   }, 300);
 }
@@ -660,7 +660,7 @@ function onPassItemTap(id){
   const index = state.pass.findIndex(item=>item.id===id);
   if(index<0) return;
   const item = state.pass[index];
-  moveWorker("server", 76, 60, "Picking up", ()=>{
+  moveWorker("server", 66, 61, "Picking up", ()=>{
     state.pass.splice(index,1);
     state.carry[emptySlot] = item;
     state.selectedCarrySlot = emptySlot;
