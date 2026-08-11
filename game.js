@@ -8,15 +8,20 @@ const ITEMS = {
   pancakes:{name:"Pancakes",emoji:"🥞",price:15}
 };
 
+const TOPPINGS = {
+  lettuce:{name:"Lettuce",emoji:"🥬"},
+  tomato:{name:"Tomato",emoji:"🍅"}
+};
+
 const LEVELS = [
-  {name:"Breakfast Basics",goal:70,customers:4,tables:2,arrivalMs:7800,patience:78,menu:["burger","coffee"],maxItems:2},
-  {name:"Add the Fryer",goal:105,customers:5,tables:2,arrivalMs:7100,patience:74,menu:["burger","coffee","fries"],maxItems:2},
-  {name:"Pancake Morning",goal:140,customers:6,tables:2,arrivalMs:6500,patience:70,menu:["burger","coffee","fries","pancakes"],maxItems:2},
-  {name:"Third Table",goal:180,customers:7,tables:3,arrivalMs:5850,patience:66,menu:["burger","coffee","fries","pancakes"],maxItems:2},
-  {name:"Lunch Rush",goal:225,customers:8,tables:3,arrivalMs:5250,patience:62,menu:["burger","coffee","fries","pancakes"],maxItems:2},
-  {name:"Dinner Rush",goal:280,customers:10,tables:3,arrivalMs:4700,patience:58,menu:["burger","coffee","fries","pancakes"],maxItems:3},
-  {name:"Friday Night",goal:340,customers:11,tables:4,arrivalMs:4150,patience:54,menu:["burger","coffee","fries","pancakes"],maxItems:3},
-  {name:"Full House",goal:420,customers:13,tables:4,arrivalMs:3650,patience:50,menu:["burger","coffee","fries","pancakes"],maxItems:3}
+  {name:"Breakfast Basics",goal:70,customers:4,tables:2,arrivalMs:7800,patience:78,menu:["burger","coffee"],maxItems:2,burgerToppings:["lettuce","tomato"]},
+  {name:"Add the Fryer",goal:105,customers:5,tables:2,arrivalMs:7100,patience:74,menu:["burger","coffee","fries"],maxItems:2,burgerToppings:["lettuce","tomato"]},
+  {name:"Pancake Morning",goal:140,customers:6,tables:2,arrivalMs:6500,patience:70,menu:["burger","coffee","fries","pancakes"],maxItems:2,burgerToppings:["lettuce","tomato"]},
+  {name:"Third Table",goal:180,customers:7,tables:3,arrivalMs:5850,patience:66,menu:["burger","coffee","fries","pancakes"],maxItems:2,burgerToppings:["lettuce","tomato"]},
+  {name:"Lunch Rush",goal:225,customers:8,tables:3,arrivalMs:5250,patience:62,menu:["burger","coffee","fries","pancakes"],maxItems:2,burgerToppings:["lettuce","tomato"]},
+  {name:"Dinner Rush",goal:280,customers:10,tables:3,arrivalMs:4700,patience:58,menu:["burger","coffee","fries","pancakes"],maxItems:3,burgerToppings:["lettuce","tomato"]},
+  {name:"Friday Night",goal:340,customers:11,tables:4,arrivalMs:4150,patience:54,menu:["burger","coffee","fries","pancakes"],maxItems:3,burgerToppings:["lettuce","tomato"]},
+  {name:"Full House",goal:420,customers:13,tables:4,arrivalMs:3650,patience:50,menu:["burger","coffee","fries","pancakes"],maxItems:3,burgerToppings:["lettuce","tomato"]}
 ];
 
 const TABLE_LAYOUTS = {
@@ -82,14 +87,41 @@ function beep(freq=550,duration=.055){
 }
 function toast(text,ms=1800){els.toast.textContent=text;els.toast.classList.add("show");clearTimeout(toastTimer);toastTimer=setTimeout(()=>els.toast.classList.remove("show"),ms)}
 function bubble(kind,text,ms=850){const el=kind==="server"?els.serverBubble:els.cookBubble;el.textContent=text;el.classList.remove("hidden");setTimeout(()=>el.classList.add("hidden"),ms)}
-function openModal(){els.modal.classList.add("open")}function closeModal(){els.modal.classList.remove("open")}
+function openModal(){els.modal.classList.add("open")}
+function closeModal(){els.modal.classList.remove("open")}
+
+function burgerOrder(toppings=[]){return{key:"burger",toppings:[...toppings]}}
+function simpleOrder(key){return{key}}
+function cloneOrder(order){return order.map(item=>item.key==="burger"?burgerOrder(item.toppings):simpleOrder(item.key))}
+function randomBurgerOrder(){
+  const available=LEVELS[state.levelIndex].burgerToppings||[];
+  return burgerOrder(available.filter(()=>Math.random()<.5));
+}
+function orderIcon(item){
+  if(item.key!=="burger")return ITEMS[item.key].emoji;
+  return `🍔${item.toppings.map(t=>TOPPINGS[t]?.emoji||"").join("")}`;
+}
+function orderDescription(item){
+  if(item.key!=="burger")return ITEMS[item.key].name;
+  if(!item.toppings.length)return "Plain burger";
+  return `Burger + ${item.toppings.map(t=>TOPPINGS[t]?.name||t).join(" + ")}`;
+}
+function toppingSignature(toppings=[]){return [...toppings].sort().join("|")}
+function itemMatches(prepared,ordered){
+  if(!prepared||!ordered||prepared.key!==ordered.key)return false;
+  if(ordered.key!=="burger")return true;
+  return toppingSignature(prepared.toppings)===toppingSignature(ordered.toppings);
+}
+function preparedIcon(item){return orderIcon(item)}
+function preparedDescription(item){return orderDescription(item)}
 
 function showIntro(){
   const lvl=LEVELS[state.levelIndex];
   els.modalIcon.textContent="🍳";els.modalTitle.textContent=`Level ${state.levelIndex+1}: ${lvl.name}`;
-  els.modalText.textContent="You still run the dining room — but now you actually make the food too.";
+  els.modalText.textContent="You run the dining room and make every order. Burger toppings now have to match the customer's order exactly.";
   els.modalDetails.innerHTML=`
-    <div class="instruction"><span>🍔</span><strong>Burger: select a prep plate → bun + lettuce + tomato → grill patty → add patty → tap completed plate.</strong></div>
+    <div class="instruction"><span>🍔</span><strong>Burger: bun + cooked patty are required. Add only the toppings shown in the customer's order.</strong></div>
+    <div class="instruction"><span>🥬🍅</span><strong>Level 1 includes plain, lettuce, tomato, and lettuce + tomato burgers.</strong></div>
     <div class="instruction"><span>☕</span><strong>Coffee: grab a cup → brew it → tap READY coffee to put it on the pass.</strong></div>
     ${lvl.menu.includes("fries")?'<div class="instruction"><span>🍟</span><strong>Fries: fryer → remove when ready → salt → tap the portion.</strong></div>':""}
     ${lvl.menu.includes("pancakes")?'<div class="instruction"><span>🥞</span><strong>Pancakes: pour → flip → plate → syrup → tap the plate.</strong></div>':""}`;
@@ -136,13 +168,28 @@ function resetTable(table){table.state="empty";table.customer=null;table.order=[
 
 function chooseOrder(){
   const lvl=LEVELS[state.levelIndex];
+
   if(state.levelIndex===0){
-    const scripted=[["burger"],["coffee"],["burger","coffee"],["burger"]];
-    return scripted[Math.min(state.ordersTaken,scripted.length-1)];
+    const scripted=[
+      [burgerOrder([])],
+      [burgerOrder(["lettuce"]),simpleOrder("coffee")],
+      [burgerOrder(["tomato"])],
+      [burgerOrder(["lettuce","tomato"]),simpleOrder("coffee")]
+    ];
+    return cloneOrder(scripted[Math.min(state.ordersTaken,scripted.length-1)]);
   }
-  let count=1;if(lvl.maxItems>=2&&Math.random()>.45)count=2;if(lvl.maxItems>=3&&Math.random()>.78)count=3;
+
+  let count=1;
+  if(lvl.maxItems>=2&&Math.random()>.45)count=2;
+  if(lvl.maxItems>=3&&Math.random()>.78)count=3;
+
   const pool=[...lvl.menu],result=[];
-  while(result.length<count&&pool.length){const idx=Math.floor(Math.random()*pool.length);result.push(pool[idx]);pool.splice(idx,1)}
+  while(result.length<count&&pool.length){
+    const idx=Math.floor(Math.random()*pool.length);
+    const key=pool[idx];
+    result.push(key==="burger"?randomBurgerOrder():simpleOrder(key));
+    pool.splice(idx,1);
+  }
   return result;
 }
 
@@ -156,39 +203,85 @@ function onWaitingTap(id){if(!state.running)return;state.selectedWaitingId=state
 
 function onTableTap(id){
   if(!state.running)return;const table=state.tables.find(t=>t.id===id);if(!table)return;
+
   if(table.state==="empty"){
     if(!state.selectedWaitingId){toast("Select a customer by the door first.");return}
     const customer=state.waiting.find(c=>c.id===state.selectedWaitingId);if(!customer)return;
     moveWorker("server",table.x-4,table.y+7,"Seating",()=>{state.waiting=state.waiting.filter(c=>c.id!==customer.id);state.selectedWaitingId=null;table.customer=customer;table.state="seated";beep(610);toast(`${customer.name} is seated. Take the order.`)},520);return;
   }
+
   if(table.state==="seated"){
-    moveWorker("server",table.x-4,table.y+7,"Taking order",()=>{table.order=chooseOrder();state.ordersTaken++;table.served=table.order.map(()=>false);table.state="waitingFood";beep(670);toast(`Table ${table.id}: ${table.order.map(k=>ITEMS[k].emoji).join(" ")}`)},520);return;
+    moveWorker("server",table.x-4,table.y+7,"Taking order",()=>{
+      table.order=chooseOrder();
+      state.ordersTaken++;
+      table.served=table.order.map(()=>false);
+      table.state="waitingFood";
+      beep(670);
+      toast(`Table ${table.id}: ${table.order.map(orderIcon).join("  ")}`);
+    },520);return;
   }
+
   if(table.state==="waitingFood"){
-    const slot=state.selectedCarrySlot;if(slot===null||!state.carry[slot]){toast("Select something on the server tray first.");return}
-    const item=state.carry[slot];const match=table.order.findIndex((key,i)=>key===item.key&&!table.served[i]);if(match<0){beep(180);toast(`Table ${table.id} didn't order that.`);return}
-    moveWorker("server",table.x-4,table.y+7,"Serving",()=>{table.served[match]=true;state.carry[slot]=null;state.selectedCarrySlot=null;beep(860);if(table.served.every(Boolean)){table.state="eating";table.eatingUntil=clock()+3900+Math.random()*1400;toast(`Table ${table.id} has everything.`)}else toast(`Table ${table.id} still needs ${remainingOrder(table)}.`)},470);return;
+    const slot=state.selectedCarrySlot;
+    if(slot===null||!state.carry[slot]){toast("Select something on the server tray first.");return}
+    const item=state.carry[slot];
+    const match=table.order.findIndex((ordered,i)=>itemMatches(item,ordered)&&!table.served[i]);
+    if(match<0){
+      beep(180);
+      if(item.key==="burger")toast(`Wrong burger for Table ${table.id}. Check the toppings.`);
+      else toast(`Table ${table.id} didn't order that.`);
+      return;
+    }
+
+    moveWorker("server",table.x-4,table.y+7,"Serving",()=>{
+      table.served[match]=true;state.carry[slot]=null;state.selectedCarrySlot=null;beep(860);
+      if(table.served.every(Boolean)){table.state="eating";table.eatingUntil=clock()+3900+Math.random()*1400;toast(`Table ${table.id} has everything.`)}
+      else toast(`Table ${table.id} still needs ${remainingOrder(table)}.`);
+    },470);return;
   }
+
   if(table.state==="eating"){toast(`Table ${table.id} is eating.`);return}
+
   if(table.state==="checkout"){
-    moveWorker("server",table.x-4,table.y+7,"Payment",()=>{const base=table.order.reduce((sum,key)=>sum+ITEMS[key].price,0);const c=table.customer,ratio=c?Math.max(0,c.patience/c.maxPatience):0,tip=Math.round(base*(.08+ratio*.30));state.cash+=base+tip;state.resolved++;table.customer=null;table.state="dirty";beep(980);toast(`+$${base+tip}. Clean Table ${table.id}.`)},500);return;
+    moveWorker("server",table.x-4,table.y+7,"Payment",()=>{
+      const base=table.order.reduce((sum,item)=>sum+ITEMS[item.key].price,0);
+      const c=table.customer,ratio=c?Math.max(0,c.patience/c.maxPatience):0,tip=Math.round(base*(.08+ratio*.30));
+      state.cash+=base+tip;state.resolved++;table.customer=null;table.state="dirty";beep(980);toast(`+$${base+tip}. Clean Table ${table.id}.`);
+    },500);return;
   }
+
   if(table.state==="dirty"){moveWorker("server",table.x-4,table.y+7,"Cleaning",()=>{table.state="cleaning";table.cleaningUntil=clock()+1300;beep(520)},480);return}
   if(table.state==="cleaning")toast("Still cleaning that table.");
 }
-function remainingOrder(table){return table.order.filter((_,i)=>!table.served[i]).map(k=>ITEMS[k].emoji).join(" ")}
+
+function remainingOrder(table){return table.order.filter((_,i)=>!table.served[i]).map(orderIcon).join("  ")}
 
 function selectedBurger(){return state.burgerSlots[state.selectedBurgerSlot]}
-function burgerComplete(slot){return slot.bun&&slot.lettuce&&slot.tomato&&slot.patty}
+function burgerCanAssemble(slot){return slot.bun&&slot.patty}
+function burgerToppingsFromSlot(slot){
+  return Object.keys(TOPPINGS).filter(topping=>slot[topping]);
+}
 function addBurgerPart(part){
   const slot=selectedBurger();if(slot[part]){toast(`That burger already has ${part}.`);return}
   const pos=STATION_POS[part];moveWorker("cook",pos.x-2,pos.y+1,`Add ${part}`,()=>{slot[part]=true;beep(610);toast(`${part[0].toUpperCase()+part.slice(1)} added to burger ${state.selectedBurgerSlot+1}.`)},320);
 }
 function onBurgerSlotTap(index){
-  if(!state.running)return;state.selectedBurgerSlot=index;const slot=state.burgerSlots[index];
-  if(burgerComplete(slot)){
-    moveWorker("cook",76,91,"Assemble burger",()=>{addToPass("burger");state.burgerSlots[index]=blankBurgerSlot();beep(920);toast("Burger assembled and sent to the pass.")},440);
-  }else{toast(`Burger prep ${index+1} selected. Add bun, lettuce, tomato, and a cooked patty.`);renderBurgerPrep()}
+  if(!state.running)return;
+  state.selectedBurgerSlot=index;
+  const slot=state.burgerSlots[index];
+
+  if(burgerCanAssemble(slot)){
+    const toppings=burgerToppingsFromSlot(slot);
+    moveWorker("cook",76,91,"Assemble burger",()=>{
+      addToPass("burger",{toppings});
+      state.burgerSlots[index]=blankBurgerSlot();
+      beep(920);
+      toast(`${orderDescription(burgerOrder(toppings))} assembled and sent to the pass.`);
+    },440);
+  }else{
+    toast(`Burger prep ${index+1} selected. Every burger needs a bun and cooked patty; toppings depend on the order.`);
+    renderBurgerPrep();
+  }
 }
 
 function onGrillTap(){
@@ -235,29 +328,73 @@ function onGriddleTap(){
 function onSyrupTap(){if(!state.running)return;const p=state.pancakes,pos=STATION_POS.syrup;if(p.prep!=="plain"){toast("There is no plated pancake waiting for syrup.");return}moveWorker("cook",pos.x-2,pos.y+1,"Add syrup",()=>{p.prep="syrup";beep(650);toast("Pancake finished. Tap the plate to send it.")},250)}
 function onPancakePrepTap(){if(!state.running)return;if(state.pancakes.prep!=="syrup"){toast(state.pancakes.prep==="plain"?"Add syrup first.":"No pancake is ready.");return}moveWorker("cook",58,94,"Pancake to pass",()=>{addToPass("pancakes");state.pancakes.prep="empty";beep(920);toast("Pancakes sent to the pass.")},300)}
 
-function addToPass(key){state.pass.push({id:`${key}-${Date.now()}-${Math.random()}`,key})}
+function addToPass(key,details={}){
+  const item={id:`${key}-${Date.now()}-${Math.random()}`,key};
+  if(key==="burger")item.toppings=[...(details.toppings||[])];
+  state.pass.push(item);
+}
 function onPassItemTap(id){
   if(!state.running)return;const emptySlot=state.carry.findIndex(x=>x===null);if(emptySlot<0){toast("Server tray is full.");return}
   const index=state.pass.findIndex(item=>item.id===id);if(index<0)return;const item=state.pass[index];
-  moveWorker("server",76,60,"Picking up",()=>{state.pass.splice(index,1);state.carry[emptySlot]=item;state.selectedCarrySlot=emptySlot;beep(810);toast(`${ITEMS[item.key].name} is on the server tray.`)},480);
+  moveWorker("server",76,60,"Picking up",()=>{state.pass.splice(index,1);state.carry[emptySlot]=item;state.selectedCarrySlot=emptySlot;beep(810);toast(`${preparedDescription(item)} is on the server tray.`)},480);
 }
-function onCarryTap(slot){if(!state.running)return;if(!state.carry[slot]){state.selectedCarrySlot=null;renderCarry();return}state.selectedCarrySlot=state.selectedCarrySlot===slot?null:slot;const item=state.carry[slot];if(state.selectedCarrySlot!==null&&item)toast(`${ITEMS[item.key].name} selected. Tap the right table.`);renderCarry()}
+function onCarryTap(slot){
+  if(!state.running)return;
+  if(!state.carry[slot]){state.selectedCarrySlot=null;renderCarry();return}
+  state.selectedCarrySlot=state.selectedCarrySlot===slot?null:slot;
+  const item=state.carry[slot];
+  if(state.selectedCarrySlot!==null&&item)toast(`${preparedDescription(item)} selected. Tap the right table.`);
+  renderCarry();
+}
 
 function checkEnd(){
-  if(state.ended||!state.running)return;const lvl=LEVELS[state.levelIndex];const allSpawned=state.spawned>=lvl.customers,noWaiting=state.waiting.length===0,noCustomers=state.tables.every(t=>!t.customer),allClean=state.tables.every(t=>t.state==="empty");
+  if(state.ended||!state.running)return;
+  const lvl=LEVELS[state.levelIndex];
+  const allSpawned=state.spawned>=lvl.customers;
+  const noWaiting=state.waiting.length===0;
+  const noCustomers=state.tables.every(t=>!t.customer);
+  const allClean=state.tables.every(t=>t.state==="empty");
   if(allSpawned&&state.resolved>=lvl.customers&&noWaiting&&noCustomers&&allClean)endLevel();
 }
+
 function endLevel(){
-  state.running=false;state.ended=true;const lvl=LEVELS[state.levelIndex],ratio=state.cash/lvl.goal,won=state.cash>=lvl.goal;let stars=0;if(won)stars=ratio>=1.4?3:ratio>=1.17?2:1;
-  if(won){const n=state.levelIndex+1;save.unlocked=Math.max(save.unlocked||1,Math.min(LEVELS.length,n+1));save.bestStars||={};save.bestStars[n]=Math.max(save.bestStars[n]||0,stars);persist()}
-  els.modalIcon.textContent=won?"🎉":"😵";els.modalTitle.textContent=won?"Shift Complete!":"Diner Disaster";els.modalText.textContent=won?`You made $${state.cash} on a $${lvl.goal} goal. ${"⭐".repeat(stars)}`:`You made $${state.cash}. You needed $${lvl.goal}.`;
+  state.running=false;state.ended=true;
+  const lvl=LEVELS[state.levelIndex],ratio=state.cash/lvl.goal,won=state.cash>=lvl.goal;
+  let stars=0;if(won)stars=ratio>=1.4?3:ratio>=1.17?2:1;
+
+  if(won){
+    const n=state.levelIndex+1;
+    save.unlocked=Math.max(save.unlocked||1,Math.min(LEVELS.length,n+1));
+    save.bestStars||={};
+    save.bestStars[n]=Math.max(save.bestStars[n]||0,stars);
+    persist();
+  }
+
+  els.modalIcon.textContent=won?"🎉":"😵";
+  els.modalTitle.textContent=won?"Shift Complete!":"Diner Disaster";
+  els.modalText.textContent=won?`You made $${state.cash} on a $${lvl.goal} goal. ${"⭐".repeat(stars)}`:`You made $${state.cash}. You needed $${lvl.goal}.`;
   els.modalDetails.innerHTML=`<div class="instruction"><span>💵</span><strong>Cash: $${state.cash}</strong></div><div class="instruction"><span>👥</span><strong>Customers: ${state.resolved}/${lvl.customers}</strong></div><div class="instruction"><span>🏆</span><strong>Best: ${"⭐".repeat(save.bestStars?.[state.levelIndex+1]||0)||"—"}</strong></div>`;
-  if(won&&state.levelIndex<LEVELS.length-1){els.modalPrimary.textContent=`Play Level ${state.levelIndex+2}`;els.modalPrimary.onclick=()=>{closeModal();startLevel(state.levelIndex+1)}}else{els.modalPrimary.textContent="Retry";els.modalPrimary.onclick=()=>{closeModal();startLevel(state.levelIndex)}}
-  els.modalSecondary.textContent="Levels";els.modalSecondary.classList.remove("hidden");els.modalSecondary.onclick=showLevels;openModal();
+
+  if(won&&state.levelIndex<LEVELS.length-1){
+    els.modalPrimary.textContent=`Play Level ${state.levelIndex+2}`;
+    els.modalPrimary.onclick=()=>{closeModal();startLevel(state.levelIndex+1)};
+  }else{
+    els.modalPrimary.textContent="Retry";
+    els.modalPrimary.onclick=()=>{closeModal();startLevel(state.levelIndex)};
+  }
+
+  els.modalSecondary.textContent="Levels";
+  els.modalSecondary.classList.remove("hidden");
+  els.modalSecondary.onclick=showLevels;
+  openModal();
 }
 
 function render(){
-  const lvl=LEVELS[state.levelIndex];els.levelLabel.textContent=`Level ${state.levelIndex+1}: ${lvl.name}`;els.cashLabel.textContent=`$${state.cash}`;els.goalLabel.textContent=`$${state.cash} / $${lvl.goal}`;els.startButton.textContent=state.running?"Running":"Start Shift";
+  const lvl=LEVELS[state.levelIndex];
+  els.levelLabel.textContent=`Level ${state.levelIndex+1}: ${lvl.name}`;
+  els.cashLabel.textContent=`$${state.cash}`;
+  els.goalLabel.textContent=`$${state.cash} / $${lvl.goal}`;
+  els.startButton.textContent=state.running?"Running":"Start Shift";
   renderMenuBoard();renderWaiting();renderTables();renderStations();renderBurgerPrep();renderSidePrep();renderPass();renderCarry();renderWorkers();
 }
 
@@ -267,56 +404,176 @@ function renderMenuBoard(){
 }
 
 function renderWaiting(){
-  els.waitingLine.innerHTML="";state.waiting.forEach((c,i)=>{const btn=document.createElement("button");btn.className=`waiting-customer ${state.selectedWaitingId===c.id?"selected":""}`;btn.style.left=`${(i%2)*44}%`;btn.style.top=`${Math.floor(i/2)*28}%`;const pct=Math.max(0,c.patience/c.maxPatience*100);btn.innerHTML=`<span class="person">${c.avatar}</span><span class="customer-name-tag">${c.name}</span><span class="mini-patience"><span style="width:${pct}%;background:${patienceColor(pct)}"></span></span>`;btn.addEventListener("click",()=>onWaitingTap(c.id));els.waitingLine.appendChild(btn)})
+  els.waitingLine.innerHTML="";
+  state.waiting.forEach((c,i)=>{
+    const btn=document.createElement("button");
+    btn.className=`waiting-customer ${state.selectedWaitingId===c.id?"selected":""}`;
+    btn.style.left=`${(i%2)*44}%`;
+    btn.style.top=`${Math.floor(i/2)*28}%`;
+    const pct=Math.max(0,c.patience/c.maxPatience*100);
+    btn.innerHTML=`<span class="person">${c.avatar}</span><span class="customer-name-tag">${c.name}</span><span class="mini-patience"><span style="width:${pct}%;background:${patienceColor(pct)}"></span></span>`;
+    btn.addEventListener("click",()=>onWaitingTap(c.id));
+    els.waitingLine.appendChild(btn);
+  });
 }
 
 function renderTables(){
-  els.tablesLayer.innerHTML="";state.tables.forEach(table=>{const btn=document.createElement("button");btn.className=`table ${["seated","waitingFood","checkout","dirty"].includes(table.state)?"action":""} ${["dirty","cleaning"].includes(table.state)?"dirty":""}`;btn.style.left=`calc(${table.x}% - 43px)`;btn.style.top=`calc(${table.y}% - 35px)`;btn.addEventListener("click",()=>onTableTap(table.id));
-    let customer="",bubbleText="",patience="";if(table.customer){customer=`<div class="seated-customer">${table.customer.avatar}</div>`;const pct=Math.max(0,table.customer.patience/table.customer.maxPatience*100);patience=`<div class="table-patience"><span style="width:${pct}%;background:${patienceColor(pct)}"></span></div>`}
-    if(table.state==="seated")bubbleText="📝 ORDER";if(table.state==="waitingFood")bubbleText=remainingOrder(table);if(table.state==="eating")bubbleText="😋 eating";if(table.state==="checkout")bubbleText="💵 CHECK";if(table.state==="dirty")bubbleText="🧽 CLEAN";if(table.state==="cleaning")bubbleText="✨ wiping";
-    btn.innerHTML=`${bubbleText?`<div class="table-bubble">${bubbleText}</div>`:""}<div class="chair chair-a"></div><div class="chair chair-b"></div><div class="tabletop"></div>${customer}<div class="table-number">${table.id}</div>${patience}`;els.tablesLayer.appendChild(btn)
-  })
+  els.tablesLayer.innerHTML="";
+  state.tables.forEach(table=>{
+    const btn=document.createElement("button");
+    btn.className=`table ${["seated","waitingFood","checkout","dirty"].includes(table.state)?"action":""} ${["dirty","cleaning"].includes(table.state)?"dirty":""}`;
+    btn.style.left=`calc(${table.x}% - 43px)`;
+    btn.style.top=`calc(${table.y}% - 35px)`;
+    btn.addEventListener("click",()=>onTableTap(table.id));
+
+    let customer="",bubbleText="",patience="";
+    if(table.customer){
+      customer=`<div class="seated-customer">${table.customer.avatar}</div>`;
+      const pct=Math.max(0,table.customer.patience/table.customer.maxPatience*100);
+      patience=`<div class="table-patience"><span style="width:${pct}%;background:${patienceColor(pct)}"></span></div>`;
+    }
+
+    if(table.state==="seated")bubbleText="📝 ORDER";
+    if(table.state==="waitingFood")bubbleText=remainingOrder(table);
+    if(table.state==="eating")bubbleText="😋 eating";
+    if(table.state==="checkout")bubbleText="💵 CHECK";
+    if(table.state==="dirty")bubbleText="🧽 CLEAN";
+    if(table.state==="cleaning")bubbleText="✨ wiping";
+
+    btn.innerHTML=`${bubbleText?`<div class="table-bubble">${bubbleText}</div>`:""}<div class="chair chair-a"></div><div class="chair chair-b"></div><div class="tabletop"></div>${customer}<div class="table-number">${table.id}</div>${patience}`;
+    els.tablesLayer.appendChild(btn);
+  });
 }
 
 function stationEl(name,visualState,label,progress,onTap){
-  const pos=STATION_POS[name],btn=document.createElement("button");btn.className=`station ${visualState||""}`;btn.style.left=`calc(${pos.x}% - 25px)`;btn.style.top=`calc(${pos.y}% - 24px)`;btn.innerHTML=`<div class="station-timer"><span style="width:${progress||0}%"></span></div><div class="station-box"></div><div class="station-icon">${pos.emoji}</div><div class="station-name">${label||pos.label}</div>`;btn.addEventListener("click",onTap);els.stationsLayer.appendChild(btn)
+  const pos=STATION_POS[name],btn=document.createElement("button");
+  btn.className=`station ${visualState||""}`;
+  btn.style.left=`calc(${pos.x}% - 25px)`;
+  btn.style.top=`calc(${pos.y}% - 24px)`;
+  btn.innerHTML=`<div class="station-timer"><span style="width:${progress||0}%"></span></div><div class="station-box"></div><div class="station-icon">${pos.emoji}</div><div class="station-name">${label||pos.label}</div>`;
+  btn.addEventListener("click",onTap);
+  els.stationsLayer.appendChild(btn);
 }
 
 function renderStations(){
-  const lvl=LEVELS[state.levelIndex],t=clock();els.stationsLayer.innerHTML="";
+  const lvl=LEVELS[state.levelIndex],t=clock();
+  els.stationsLayer.innerHTML="";
+
   if(lvl.menu.includes("burger")){
-    const g=state.grill;let gp=0,gl="GRILL";if(g.state==="cooking"){gp=Math.min(100,(t-g.startedAt)/(g.readyAt-g.startedAt)*100);gl=`${Math.max(0,(g.readyAt-t)/1000).toFixed(1)}s`}else if(g.state==="ready"){gp=100;gl="PATTY READY"}else if(g.state==="burned"){gp=100;gl="BURNED"}
-    stationEl("grill",g.state,gl,gp,onGrillTap);stationEl("bun","","BUN",0,()=>addBurgerPart("bun"));stationEl("lettuce","","LETTUCE",0,()=>addBurgerPart("lettuce"));stationEl("tomato","","TOMATO",0,()=>addBurgerPart("tomato"));
+    const g=state.grill;let gp=0,gl="GRILL";
+    if(g.state==="cooking"){gp=Math.min(100,(t-g.startedAt)/(g.readyAt-g.startedAt)*100);gl=`${Math.max(0,(g.readyAt-t)/1000).toFixed(1)}s`}
+    else if(g.state==="ready"){gp=100;gl="PATTY READY"}
+    else if(g.state==="burned"){gp=100;gl="BURNED"}
+    stationEl("grill",g.state,gl,gp,onGrillTap);
+    stationEl("bun","","BUN",0,()=>addBurgerPart("bun"));
+    stationEl("lettuce","","LETTUCE",0,()=>addBurgerPart("lettuce"));
+    stationEl("tomato","","TOMATO",0,()=>addBurgerPart("tomato"));
   }
+
   if(lvl.menu.includes("coffee")){
-    const c=state.coffee;stationEl("cup",c.cup?"selected":"",c.cup?"CUP READY":"GRAB CUP",0,onCupTap);let cp=0,cl="BREWER";if(c.state==="brewing"){cp=Math.min(100,(t-c.startedAt)/(c.readyAt-c.startedAt)*100);cl=`${Math.max(0,(c.readyAt-t)/1000).toFixed(1)}s`}else if(c.state==="ready"){cp=100;cl="COFFEE READY"}stationEl("coffee",c.state==="ready"?"ready":c.state,cl,cp,onCoffeeTap);
+    const c=state.coffee;
+    stationEl("cup",c.cup?"selected":"",c.cup?"CUP READY":"GRAB CUP",0,onCupTap);
+    let cp=0,cl="BREWER";
+    if(c.state==="brewing"){cp=Math.min(100,(t-c.startedAt)/(c.readyAt-c.startedAt)*100);cl=`${Math.max(0,(c.readyAt-t)/1000).toFixed(1)}s`}
+    else if(c.state==="ready"){cp=100;cl="COFFEE READY"}
+    stationEl("coffee",c.state==="ready"?"ready":c.state,cl,cp,onCoffeeTap);
   }
+
   if(lvl.menu.includes("fries")){
-    const f=state.fries;let fp=0,fl="FRYER";if(f.state==="frying"){fp=Math.min(100,(t-f.startedAt)/(f.readyAt-f.startedAt)*100);fl=`${Math.max(0,(f.readyAt-t)/1000).toFixed(1)}s`}else if(f.state==="ready"){fp=100;fl="PULL FRIES"}else if(f.state==="burned"){fp=100;fl="BURNED"}stationEl("fryer",f.state,fl,fp,onFryerTap);stationEl("salt",f.prep==="unsalted"?"selected":"","SALT",0,onSaltTap);
+    const f=state.fries;let fp=0,fl="FRYER";
+    if(f.state==="frying"){fp=Math.min(100,(t-f.startedAt)/(f.readyAt-f.startedAt)*100);fl=`${Math.max(0,(f.readyAt-t)/1000).toFixed(1)}s`}
+    else if(f.state==="ready"){fp=100;fl="PULL FRIES"}
+    else if(f.state==="burned"){fp=100;fl="BURNED"}
+    stationEl("fryer",f.state,fl,fp,onFryerTap);
+    stationEl("salt",f.prep==="unsalted"?"selected":"","SALT",0,onSaltTap);
   }
+
   if(lvl.menu.includes("pancakes")){
-    const p=state.pancakes;let pp=0,pl="GRIDDLE";if(p.state==="side1"||p.state==="side2"){pp=Math.min(100,(t-p.startedAt)/(p.readyAt-p.startedAt)*100);pl=`${Math.max(0,(p.readyAt-t)/1000).toFixed(1)}s`}else if(p.state==="flipReady"){pp=100;pl="FLIP!"}else if(p.state==="plateReady"){pp=100;pl="PLATE!"}else if(p.state==="burned"){pp=100;pl="BURNED"}stationEl("griddle",["flipReady","plateReady"].includes(p.state)?"ready":p.state,pl,pp,onGriddleTap);stationEl("syrup",p.prep==="plain"?"selected":"","SYRUP",0,onSyrupTap);
+    const p=state.pancakes;let pp=0,pl="GRIDDLE";
+    if(p.state==="side1"||p.state==="side2"){pp=Math.min(100,(t-p.startedAt)/(p.readyAt-p.startedAt)*100);pl=`${Math.max(0,(p.readyAt-t)/1000).toFixed(1)}s`}
+    else if(p.state==="flipReady"){pp=100;pl="FLIP!"}
+    else if(p.state==="plateReady"){pp=100;pl="PLATE!"}
+    else if(p.state==="burned"){pp=100;pl="BURNED"}
+    stationEl("griddle",["flipReady","plateReady"].includes(p.state)?"ready":p.state,pl,pp,onGriddleTap);
+    stationEl("syrup",p.prep==="plain"?"selected":"","SYRUP",0,onSyrupTap);
   }
 }
 
 function renderBurgerPrep(){
-  if(!LEVELS[state.levelIndex].menu.includes("burger")){els.burgerPrepSlots.parentElement.classList.add("hidden");return}else els.burgerPrepSlots.parentElement.classList.remove("hidden");
-  els.burgerPrepSlots.innerHTML="";state.burgerSlots.forEach((slot,i)=>{const btn=document.createElement("button"),complete=burgerComplete(slot);btn.className=`prep-slot ${state.selectedBurgerSlot===i?"selected":""} ${complete?"ready":""}`;btn.innerHTML=`<div class="prep-parts"><span>${slot.bun?"🥯":"▫️"}</span><span>${slot.lettuce?"🥬":"▫️"}</span><span>${slot.tomato?"🍅":"▫️"}</span><span>${slot.patty?"🥩":"▫️"}</span></div><span class="prep-step">PREP ${i+1}</span>${complete?'<span class="prep-go">TAP TO ASSEMBLE</span>':""}`;btn.addEventListener("click",()=>onBurgerSlotTap(i));els.burgerPrepSlots.appendChild(btn)})
+  if(!LEVELS[state.levelIndex].menu.includes("burger")){
+    els.burgerPrepSlots.parentElement.classList.add("hidden");
+    return;
+  }else{
+    els.burgerPrepSlots.parentElement.classList.remove("hidden");
+  }
+
+  els.burgerPrepSlots.innerHTML="";
+  state.burgerSlots.forEach((slot,i)=>{
+    const btn=document.createElement("button");
+    const canAssemble=burgerCanAssemble(slot);
+    btn.className=`prep-slot ${state.selectedBurgerSlot===i?"selected":""} ${canAssemble?"ready":""}`;
+    btn.innerHTML=`<div class="prep-parts"><span>${slot.bun?"🥯":"▫️"}</span><span>${slot.lettuce?"🥬":"▫️"}</span><span>${slot.tomato?"🍅":"▫️"}</span><span>${slot.patty?"🥩":"▫️"}</span></div><span class="prep-step">PREP ${i+1}</span>${canAssemble?'<span class="prep-go">TAP TO ASSEMBLE</span>':""}`;
+    btn.addEventListener("click",()=>onBurgerSlotTap(i));
+    els.burgerPrepSlots.appendChild(btn);
+  });
 }
 
 function renderSidePrep(){
   const lvl=LEVELS[state.levelIndex],parts=[];
-  if(lvl.menu.includes("fries")){const f=state.fries,label=f.prep==="salted"?"READY":f.prep==="unsalted"?"NEEDS SALT":"EMPTY",cls=f.prep==="salted"?"ready":f.prep==="unsalted"?"action":"";parts.push(`<button id="friesPrep" class="side-prep ${cls}"><strong>FRIES TRAY</strong><span class="big">${f.prep==="empty"?"▫️":"🍟"}</span>${label}</button>`)}
-  if(lvl.menu.includes("pancakes")){const p=state.pancakes,label=p.prep==="syrup"?"READY":p.prep==="plain"?"ADD SYRUP":"EMPTY",cls=p.prep==="syrup"?"ready":p.prep==="plain"?"action":"";parts.push(`<button id="pancakePrep" class="side-prep ${cls}"><strong>PANCAKE PLATE</strong><span class="big">${p.prep==="empty"?"▫️":"🥞"}</span>${label}</button>`)}
-  els.sidePrepArea.innerHTML=parts.join("");document.querySelector("#friesPrep")?.addEventListener("click",onFriesPrepTap);document.querySelector("#pancakePrep")?.addEventListener("click",onPancakePrepTap);
+  if(lvl.menu.includes("fries")){
+    const f=state.fries,label=f.prep==="salted"?"READY":f.prep==="unsalted"?"NEEDS SALT":"EMPTY",cls=f.prep==="salted"?"ready":f.prep==="unsalted"?"action":"";
+    parts.push(`<button id="friesPrep" class="side-prep ${cls}"><strong>FRIES TRAY</strong><span class="big">${f.prep==="empty"?"▫️":"🍟"}</span>${label}</button>`);
+  }
+  if(lvl.menu.includes("pancakes")){
+    const p=state.pancakes,label=p.prep==="syrup"?"READY":p.prep==="plain"?"ADD SYRUP":"EMPTY",cls=p.prep==="syrup"?"ready":p.prep==="plain"?"action":"";
+    parts.push(`<button id="pancakePrep" class="side-prep ${cls}"><strong>PANCAKE PLATE</strong><span class="big">${p.prep==="empty"?"▫️":"🥞"}</span>${label}</button>`);
+  }
+  els.sidePrepArea.innerHTML=parts.join("");
+  document.querySelector("#friesPrep")?.addEventListener("click",onFriesPrepTap);
+  document.querySelector("#pancakePrep")?.addEventListener("click",onPancakePrepTap);
 }
 
-function renderPass(){if(!state.pass.length){els.passSlots.innerHTML='<span class="empty-pass">finished orders</span>';return}els.passSlots.innerHTML="";state.pass.forEach(item=>{const btn=document.createElement("button");btn.className="pass-item";btn.textContent=ITEMS[item.key].emoji;btn.addEventListener("click",()=>onPassItemTap(item.id));els.passSlots.appendChild(btn)})}
-function renderCarry(){els.carrySlots.forEach((btn,i)=>{const item=state.carry[i];btn.textContent=item?ITEMS[item.key].emoji:"—";btn.classList.toggle("selected",state.selectedCarrySlot===i)})}
-function renderWorkers(){els.server.style.left=`calc(${state.server.x}% - 26px)`;els.server.style.top=`calc(${state.server.y}% - 26px)`;els.cook.style.left=`calc(${state.cook.x}% - 26px)`;els.cook.style.top=`calc(${state.cook.y}% - 26px)`;els.server.classList.toggle("busy",state.server.busy);els.cook.classList.toggle("busy",state.cook.busy)}
+function renderPass(){
+  if(!state.pass.length){els.passSlots.innerHTML='<span class="empty-pass">finished orders</span>';return}
+  els.passSlots.innerHTML="";
+  state.pass.forEach(item=>{
+    const btn=document.createElement("button");
+    btn.className="pass-item";
+    btn.textContent=preparedIcon(item);
+    btn.setAttribute("aria-label",preparedDescription(item));
+    btn.addEventListener("click",()=>onPassItemTap(item.id));
+    els.passSlots.appendChild(btn);
+  });
+}
+
+function renderCarry(){
+  els.carrySlots.forEach((btn,i)=>{
+    const item=state.carry[i];
+    btn.textContent=item?preparedIcon(item):"—";
+    btn.setAttribute("aria-label",item?preparedDescription(item):`Empty tray slot ${i+1}`);
+    btn.classList.toggle("selected",state.selectedCarrySlot===i);
+  });
+}
+
+function renderWorkers(){
+  els.server.style.left=`calc(${state.server.x}% - 26px)`;
+  els.server.style.top=`calc(${state.server.y}% - 26px)`;
+  els.cook.style.left=`calc(${state.cook.x}% - 26px)`;
+  els.cook.style.top=`calc(${state.cook.y}% - 26px)`;
+  els.server.classList.toggle("busy",state.server.busy);
+  els.cook.classList.toggle("busy",state.cook.busy);
+}
 function patienceColor(pct){if(pct>55)return"#5d9869";if(pct>27)return"#e2a53d";return"#b44136"}
 
-els.carrySlots.forEach((btn,i)=>btn.addEventListener("click",()=>onCarryTap(i)));els.levelsButton.addEventListener("click",showLevels);els.restartButton.addEventListener("click",()=>{if(!state.running){startLevel(state.levelIndex);return}if(confirm("Restart this level?"))startLevel(state.levelIndex)});els.startButton.addEventListener("click",()=>{if(!state.running)startLevel(state.levelIndex)});
-if("serviceWorker" in navigator)window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(()=>{}));
-render();showIntro();
+els.carrySlots.forEach((btn,i)=>btn.addEventListener("click",()=>onCarryTap(i)));
+els.levelsButton.addEventListener("click",showLevels);
+els.restartButton.addEventListener("click",()=>{if(!state.running){startLevel(state.levelIndex);return}if(confirm("Restart this level?"))startLevel(state.levelIndex)});
+els.startButton.addEventListener("click",()=>{if(!state.running)startLevel(state.levelIndex)});
+
+if("serviceWorker" in navigator){
+  window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(()=>{}));
+}
+
+render();
+showIntro();
 })();

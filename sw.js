@@ -1,9 +1,9 @@
-const CACHE_NAME = "order-up-kitchen-v3-20260811-1";
+const CACHE_NAME = "order-up-kitchen-v3-1-burger-variants-20260811-1";
 const CORE_ASSETS = [
   "./",
   "./index.html",
-  "./style.css",
-  "./game.js",
+  "./style.css?v=3.1",
+  "./game.js?v=3.1",
   "./manifest.json",
   "./icon.svg"
 ];
@@ -19,9 +19,7 @@ self.addEventListener("install", event => {
 self.addEventListener("activate", event => {
   event.waitUntil(
     caches.keys()
-      .then(keys => Promise.all(
-        keys.filter(key => key !== CACHE_NAME).map(key => caches.delete(key))
-      ))
+      .then(keys => Promise.all(keys.filter(key => key !== CACHE_NAME).map(key => caches.delete(key))))
       .then(() => self.clients.claim())
   );
 });

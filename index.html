@@ -10,96 +10,38 @@
   <title>Order Up!</title>
   <link rel="manifest" href="./manifest.json">
   <link rel="icon" href="./icon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="./style.css">
+  <link rel="stylesheet" href="./style.css?v=3.1">
 </head>
 <body>
   <main id="app">
     <header class="hud">
-      <div class="brand">
-        <span class="brand-title">ORDER UP!</span>
-        <span id="levelLabel">Level 1</span>
-      </div>
+      <div class="brand"><span class="brand-title">ORDER UP!</span><span id="levelLabel">Level 1</span></div>
       <div class="hud-pill"><span>💵</span><strong id="cashLabel">$0</strong></div>
       <div class="hud-pill goal"><span>⭐</span><strong id="goalLabel">$0 / $70</strong></div>
     </header>
-
     <section class="restaurant-shell">
       <div id="restaurant" class="restaurant">
-        <div class="dining-floor"></div>
-        <div class="kitchen-floor"></div>
-        <div class="kitchen-wall"></div>
-
-        <div class="sign">ORDER UP! DINER</div>
-        <div class="window window-a"></div>
-        <div class="window window-b"></div>
+        <div class="dining-floor"></div><div class="kitchen-floor"></div><div class="kitchen-wall"></div>
+        <div class="sign">ORDER UP! DINER</div><div class="window window-a"></div><div class="window window-b"></div>
         <button id="door" class="door" aria-label="Entrance"><span>OPEN</span></button>
-
-        <div class="wait-rug"><span>WAIT HERE</span></div>
-        <div id="waitingLine" class="waiting-line"></div>
-        <div class="host-stand"><small>HOST</small><span>🛎️</span></div>
-        <div class="plant plant-a">🪴</div>
-        <div class="plant plant-b">🪴</div>
-
+        <div class="wait-rug"><span>WAIT HERE</span></div><div id="waitingLine" class="waiting-line"></div>
+        <div class="host-stand"><small>HOST</small><span>🛎️</span></div><div class="plant plant-a">🪴</div><div class="plant plant-b">🪴</div>
         <div id="tablesLayer" class="tables-layer"></div>
-
-        <div class="kitchen-label">KITCHEN</div>
-        <div id="menuBoard" class="menu-board"></div>
-        <div id="stationsLayer" class="stations-layer"></div>
-
-        <div class="burger-prep">
-          <div class="counter-title">BURGER PREP</div>
-          <div id="burgerPrepSlots" class="burger-prep-slots"></div>
-        </div>
-
+        <div class="kitchen-label">KITCHEN</div><div id="menuBoard" class="menu-board"></div><div id="stationsLayer" class="stations-layer"></div>
+        <div class="burger-prep"><div class="counter-title">BURGER PREP</div><div id="burgerPrepSlots" class="burger-prep-slots"></div></div>
         <div id="sidePrepArea" class="side-prep-area"></div>
-
-        <div class="pass-counter">
-          <div class="pass-label">PASS</div>
-          <div id="passSlots" class="pass-slots"></div>
-        </div>
-
-        <div id="server" class="worker server">
-          <div id="serverBubble" class="worker-bubble hidden"></div>
-          <div class="worker-person">👩🏽‍💼</div>
-          <div class="worker-label">SERVER</div>
-        </div>
-
-        <div id="cook" class="worker cook">
-          <div id="cookBubble" class="worker-bubble hidden"></div>
-          <div class="worker-person">👩🏾‍🍳</div>
-          <div class="worker-label">COOK</div>
-        </div>
-
-        <div class="carry-tray">
-          <span class="tray-label">SERVER TRAY</span>
-          <div class="carry-slots">
-            <button class="carry-slot" data-slot="0">—</button>
-            <button class="carry-slot" data-slot="1">—</button>
-          </div>
-        </div>
-
+        <div class="pass-counter"><div class="pass-label">PASS</div><div id="passSlots" class="pass-slots"></div></div>
+        <div id="server" class="worker server"><div id="serverBubble" class="worker-bubble hidden"></div><div class="worker-person">👩🏽‍💼</div><div class="worker-label">SERVER</div></div>
+        <div id="cook" class="worker cook"><div id="cookBubble" class="worker-bubble hidden"></div><div class="worker-person">👩🏾‍🍳</div><div class="worker-label">COOK</div></div>
+        <div class="carry-tray"><span class="tray-label">SERVER TRAY</span><div class="carry-slots"><button class="carry-slot" data-slot="0">—</button><button class="carry-slot" data-slot="1">—</button></div></div>
         <div id="toast" class="toast">Tap Start Shift when you're ready.</div>
       </div>
     </section>
-
-    <footer class="controls">
-      <button id="levelsButton" class="secondary-button">Levels</button>
-      <button id="restartButton" class="secondary-button">Restart</button>
-      <button id="startButton" class="primary-button">Start Shift</button>
-    </footer>
+    <footer class="controls"><button id="levelsButton" class="secondary-button">Levels</button><button id="restartButton" class="secondary-button">Restart</button><button id="startButton" class="primary-button">Start Shift</button></footer>
   </main>
-
   <div id="modal" class="modal open" role="dialog" aria-modal="true">
-    <div class="modal-card">
-      <div id="modalIcon" class="modal-icon">🍽️</div>
-      <h1 id="modalTitle">Order Up!</h1>
-      <p id="modalText"></p>
-      <div id="modalDetails" class="modal-details"></div>
-      <button id="modalPrimary" class="primary-button">Play</button>
-      <button id="modalSecondary" class="secondary-button hidden">Levels</button>
-    </div>
+    <div class="modal-card"><div id="modalIcon" class="modal-icon">🍽️</div><h1 id="modalTitle">Order Up!</h1><p id="modalText"></p><div id="modalDetails" class="modal-details"></div><button id="modalPrimary" class="primary-button">Play</button><button id="modalSecondary" class="secondary-button hidden">Levels</button></div>
   </div>
-
-  <script src="./game.js"></script>
+  <script src="./game.js?v=3.1"></script>
 </body>
 </html>
