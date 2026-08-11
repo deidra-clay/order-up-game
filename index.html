@@ -20,7 +20,7 @@
         <span id="levelLabel">Level 1</span>
       </div>
       <div class="hud-pill"><span>💵</span><strong id="cashLabel">$0</strong></div>
-      <div class="hud-pill goal"><span>⭐</span><strong id="goalLabel">$0 / $55</strong></div>
+      <div class="hud-pill goal"><span>⭐</span><strong id="goalLabel">$0 / $70</strong></div>
     </header>
 
     <section class="restaurant-shell">
@@ -32,11 +32,10 @@
         <div class="sign">ORDER UP! DINER</div>
         <div class="window window-a"></div>
         <div class="window window-b"></div>
-
         <button id="door" class="door" aria-label="Entrance"><span>OPEN</span></button>
+
         <div class="wait-rug"><span>WAIT HERE</span></div>
         <div id="waitingLine" class="waiting-line"></div>
-
         <div class="host-stand"><small>HOST</small><span>🛎️</span></div>
         <div class="plant plant-a">🪴</div>
         <div class="plant plant-b">🪴</div>
@@ -44,22 +43,20 @@
         <div id="tablesLayer" class="tables-layer"></div>
 
         <div class="kitchen-label">KITCHEN</div>
-        <div class="menu-board">
-          <strong>TODAY</strong>
-          <span>🍔 Burger</span>
-          <span>☕ Coffee</span>
-          <span>🍟 Fries</span>
-          <span>🥞 Pancakes</span>
+        <div id="menuBoard" class="menu-board"></div>
+        <div id="stationsLayer" class="stations-layer"></div>
+
+        <div class="burger-prep">
+          <div class="counter-title">BURGER PREP</div>
+          <div id="burgerPrepSlots" class="burger-prep-slots"></div>
         </div>
 
-        <div id="stationsLayer" class="stations-layer"></div>
+        <div id="sidePrepArea" class="side-prep-area"></div>
 
         <div class="pass-counter">
           <div class="pass-label">PASS</div>
           <div id="passSlots" class="pass-slots"></div>
         </div>
-
-        <div class="dish-bin"><span>🧺</span><small>DISHES</small></div>
 
         <div id="server" class="worker server">
           <div id="serverBubble" class="worker-bubble hidden"></div>
