@@ -160,12 +160,12 @@ button:active{transform:scale(.98)}
   font-weight:1000;letter-spacing:.13em;font-size:.65rem;z-index:2
 }
 .menu-board{
-  position:absolute;left:2.2%;bottom:13%;width:18%;min-height:16%;padding:7px;border:3px solid #714a2c;
+  position:absolute;left:2%;bottom:13%;width:16%;min-height:16%;padding:7px;border:3px solid #714a2c;
   border-radius:4px;background:#344037;color:#f2e6c9;display:flex;flex-direction:column;gap:3px;
   font-size:.43rem;z-index:3;box-shadow:0 4px 0 rgba(57,38,24,.15)
 }
 .menu-board strong{font-size:.5rem;letter-spacing:.08em}
-.station{position:absolute;width:54px;height:56px;padding:0;border:0;background:transparent;z-index:4}
+.station{position:absolute;width:50px;height:54px;padding:0;border:0;background:transparent;z-index:4}
 .station-box{
   position:absolute;inset:7px 2px 2px;border-radius:7px;border:2px solid #616461;
   background:linear-gradient(#d9dcda,#aeb2af);box-shadow:0 4px 0 rgba(50,50,47,.25)
@@ -173,7 +173,7 @@ button:active{transform:scale(.98)}
 .station.selected .station-box{box-shadow:0 0 0 3px #f2bd45,0 4px 0 rgba(50,50,47,.25)}
 .station.ready .station-box{box-shadow:0 0 0 3px #69a875,0 4px 0 rgba(50,50,47,.25)}
 .station.burned .station-box{box-shadow:0 0 0 3px #c44b3d,0 4px 0 rgba(50,50,47,.25)}
-.station-icon{position:absolute;top:13px;left:0;right:0;font-size:1.4rem;z-index:5}
+.station-icon{position:absolute;top:10px;left:0;right:0;display:grid;place-items:center;z-index:5;min-height:24px}
 .station-name{
   position:absolute;bottom:6px;left:3px;right:3px;padding:1px 2px;border-radius:4px;
   background:rgba(35,38,35,.86);color:white;font-size:.34rem;font-weight:900;z-index:6
@@ -183,7 +183,7 @@ button:active{transform:scale(.98)}
 }
 .station-timer>span{display:block;height:100%;width:0;background:#f2bd45}
 .burger-prep{
-  position:absolute;right:2%;bottom:2%;width:28%;min-height:18%;padding:8px 6px 7px;
+  position:absolute;right:1.5%;bottom:1.4%;width:27%;min-height:18%;padding:8px 6px 7px;
   border:3px solid #8a6d4b;border-radius:13px;background:#dbc39f;z-index:4;
   box-shadow:0 4px 0 rgba(80,61,41,.22)
 }
@@ -205,7 +205,7 @@ button:active{transform:scale(.98)}
 .prep-slot .prep-note{font-size:.33rem;color:#7e6c5e;line-height:1.05;text-align:center;margin-top:2px}
 
 .side-prep-area{
-  position:absolute;left:44%;bottom:2%;width:22%;display:grid;gap:6px;z-index:4
+  position:absolute;left:42%;bottom:1.6%;width:18%;display:grid;gap:6px;z-index:4
 }
 .side-prep{
   min-height:48px;border:2px solid #90735b;border-radius:9px;background:#f5ead8;
@@ -214,7 +214,7 @@ button:active{transform:scale(.98)}
 .side-prep.ready{background:#eef7e8}
 .side-prep .big{font-size:1.3rem}
 .pass-counter{
-  position:absolute;right:2%;bottom:27%;width:45%;min-height:62px;padding:15px 5px 5px;
+  position:absolute;right:2.2%;bottom:30%;width:36%;min-height:56px;padding:15px 5px 5px;
   border:2px solid #594536;border-radius:6px;background:#c6b8a8;z-index:4;box-shadow:0 5px 0 rgba(69,52,40,.19)
 }
 .pass-label{
@@ -245,7 +245,7 @@ button:active{transform:scale(.98)}
 .server{left:31%;top:52%}.cook{left:44%;top:79%}
 
 .carry-tray{
-  position:absolute;left:2%;bottom:1.5%;width:22%;height:11%;padding:14px 4px 4px;
+  position:absolute;left:2%;bottom:1.5%;width:22%;height:11.5%;padding:14px 4px 4px;
   border:2px solid #6c513c;border-radius:8px;background:#e3cda9;z-index:5
 }
 .tray-label{
@@ -340,4 +340,51 @@ button:active{transform:scale(.98)}
   .worker-person{font-size:1.9rem}
   .table{transform:scale(.93)}
   .prep-slot{min-height:96px}
+}
+
+
+.station-art{display:flex;align-items:center;justify-content:center;min-height:24px}
+.station-art .burger-layer{margin:0 auto}
+.station-art.station-bun{display:flex;flex-direction:column;gap:1px}
+.station-art.station-bun .burger-top{width:24px;height:9px}
+.station-art.station-bun .burger-bottom{width:24px;height:6px}
+.station-art.station-patty .burger-patty{width:26px;height:8px}
+.station-art.station-lettuce .burger-lettuce{width:28px;height:8px}
+.station-art.station-tomato .burger-tomato{width:26px;height:8px}
+.station-art.station-cup .cup-shape{
+  width:18px;height:18px;border:2px solid #c74a42;border-top:none;border-radius:3px 3px 6px 6px;
+  background:linear-gradient(#fff,#f6f3ef);position:relative
+}
+.station-art.station-cup .cup-shape:before{
+  content:"";position:absolute;right:-5px;top:4px;width:6px;height:8px;border:2px solid #c74a42;border-left:none;border-radius:0 6px 6px 0
+}
+.station-art.station-coffee .coffee-cup{
+  width:22px;height:14px;border:2px solid #655243;border-top:none;border-radius:3px 3px 7px 7px;background:#fbfaf6;position:relative
+}
+.station-art.station-coffee .coffee-cup:before{
+  content:"";position:absolute;left:2px;right:2px;top:0;height:8px;border-radius:0 0 6px 6px;background:#5d3928
+}
+.station-art.station-coffee .coffee-cup:after{
+  content:"";position:absolute;right:-5px;top:2px;width:5px;height:7px;border:2px solid #655243;border-left:none;border-radius:0 6px 6px 0
+}
+.station-art.station-fries .fries-pack{
+  width:20px;height:18px;background:#cb5441;border:1px solid #9e3123;border-radius:2px 2px 8px 8px;position:relative
+}
+.station-art.station-fries .fries-pack:before{
+  content:"";position:absolute;left:3px;top:-7px;width:3px;height:9px;background:#f6c55a;box-shadow:4px -1px 0 #f6c55a,8px 1px 0 #f6c55a,12px -1px 0 #f6c55a
+}
+.station-art.station-salt .salt-shaker{
+  width:14px;height:18px;border:2px solid #8f99a1;border-radius:4px;background:linear-gradient(#fefefe,#e8ecf0);position:relative
+}
+.station-art.station-salt .salt-shaker:before{
+  content:"";position:absolute;left:2px;right:2px;top:-4px;height:4px;border-radius:3px 3px 0 0;background:#89949b
+}
+.station-art.station-griddle .mini-pancake{
+  width:24px;height:9px;border-radius:50%;background:#e6b667;border:1px solid #b78034;box-shadow:0 6px 0 #d79e47
+}
+.station-art.station-syrup .syrup-bottle{
+  width:14px;height:20px;border-radius:4px 4px 6px 6px;background:linear-gradient(#f0b841,#c97616);border:1px solid #8f5416;position:relative
+}
+.station-art.station-syrup .syrup-bottle:before{
+  content:"";position:absolute;left:4px;right:4px;top:-5px;height:5px;border-radius:3px 3px 0 0;background:#8a4f17
 }

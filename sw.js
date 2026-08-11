@@ -1,9 +1,9 @@
-const CACHE_NAME = "order-up-kitchen-v3-3-real-visual-burgers-20260811-1";
+const CACHE_NAME = "order-up-kitchen-v3-4-layout-and-station-visuals-20260811-1";
 const CORE_ASSETS = [
   "./",
   "./index.html",
-  "./style.css?v=3.3",
-  "./game.js?v=3.3",
+  "./style.css?v=3.4",
+  "./game.js?v=3.4",
   "./manifest.json",
   "./icon.svg"
 ];

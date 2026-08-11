@@ -31,16 +31,16 @@ const TABLE_LAYOUTS = {
 };
 
 const STATION_POS = {
-  grill:{x:25,y:70,emoji:"🥩",label:"GRILL"},
-  bun:{x:36,y:70,emoji:"🥯",label:"BUN"},
-  lettuce:{x:47,y:70,emoji:"🥬",label:"LETTUCE"},
-  tomato:{x:58,y:70,emoji:"🍅",label:"TOMATO"},
-  cup:{x:71,y:70,emoji:"🥤",label:"GRAB CUP"},
-  coffee:{x:83,y:70,emoji:"☕",label:"BREWER"},
-  fryer:{x:29,y:84,emoji:"🍟",label:"FRYER"},
-  salt:{x:41,y:84,emoji:"🧂",label:"SALT"},
-  griddle:{x:54,y:84,emoji:"🥞",label:"GRIDDLE"},
-  syrup:{x:66,y:84,emoji:"🍯",label:"SYRUP"}
+  grill:{x:23,y:72,label:"GRILL"},
+  bun:{x:33,y:72,label:"BUN"},
+  lettuce:{x:43,y:72,label:"LETTUCE"},
+  tomato:{x:53,y:72,label:"TOMATO"},
+  cup:{x:23,y:84,label:"GRAB CUP"},
+  coffee:{x:33,y:84,label:"BREWER"},
+  fryer:{x:43,y:84,label:"FRYER"},
+  salt:{x:53,y:84,label:"SALT"},
+  griddle:{x:63,y:84,label:"GRIDDLE"},
+  syrup:{x:73,y:84,label:"SYRUP"}
 };
 
 const NAMES=["Maya","Theo","Nina","Jay","Lena","Omar","Riley","Sam","Ari","Tess","Miles","Zoe","Kai","Ivy","Noah","Mina"];
@@ -167,7 +167,7 @@ function showIntro(){
   const lvl = LEVELS[state.levelIndex];
   els.modalIcon.textContent = "🍳";
   els.modalTitle.textContent = `Level ${state.levelIndex+1}: ${lvl.name}`;
-  els.modalText.textContent = "Orders now show real burger visuals. Build the burger to match what the customer sees.";
+  els.modalText.textContent = "Orders and kitchen parts now use matching visuals. Build the burger to match what the customer sees.";
   els.modalDetails.innerHTML = `
     <div class="instruction"><span>🎟️</span><strong>Read the order ticket visually. Plain, lettuce, tomato, and lettuce + tomato burgers all look different.</strong></div>
     <div class="instruction"><span>🍔</span><strong>Burger: bun + cooked patty are required. Add only the toppings shown.</strong></div>
@@ -819,6 +819,19 @@ function itemVisualHTML(item, sizeClass=""){
   if(item.key==="pancakes") return `<div class="pancake-visual">🥞</div>`;
   return `<div class="coffee-visual">?</div>`;
 }
+function stationGraphicHTML(name){
+  if(name==="grill") return `<div class="station-art station-patty"><div class="burger-patty"></div></div>`;
+  if(name==="bun") return `<div class="station-art station-bun"><div class="burger-top"></div><div class="burger-bottom"></div></div>`;
+  if(name==="lettuce") return `<div class="station-art station-lettuce"><div class="burger-lettuce"></div></div>`;
+  if(name==="tomato") return `<div class="station-art station-tomato"><div class="burger-tomato"></div></div>`;
+  if(name==="cup") return `<div class="station-art station-cup"><div class="cup-shape"></div></div>`;
+  if(name==="coffee") return `<div class="station-art station-coffee"><div class="coffee-cup"></div></div>`;
+  if(name==="fryer") return `<div class="station-art station-fries"><div class="fries-pack"></div></div>`;
+  if(name==="salt") return `<div class="station-art station-salt"><div class="salt-shaker"></div></div>`;
+  if(name==="griddle") return `<div class="station-art station-griddle"><div class="mini-pancake"></div></div>`;
+  if(name==="syrup") return `<div class="station-art station-syrup"><div class="syrup-bottle"></div></div>`;
+  return "";
+}
 function orderTicketHTML(order, served=[]){
   const pending = order.filter((_,i)=>!served[i]);
   return `<div class="order-ticket">${pending.map(item=>{
@@ -832,12 +845,12 @@ function stationEl(name, visualState, label, progress, onTap){
   const pos = STATION_POS[name];
   const btn = document.createElement("button");
   btn.className = `station ${visualState||""}`;
-  btn.style.left = `calc(${pos.x}% - 27px)`;
-  btn.style.top = `calc(${pos.y}% - 28px)`;
+  btn.style.left = `calc(${pos.x}% - 25px)`;
+  btn.style.top = `calc(${pos.y}% - 27px)`;
   btn.innerHTML = `
     <div class="station-timer"><span style="width:${progress||0}%"></span></div>
     <div class="station-box"></div>
-    <div class="station-icon">${pos.emoji}</div>
+    <div class="station-icon">${stationGraphicHTML(name)}</div>
     <div class="station-name">${label||pos.label}</div>
   `;
   btn.addEventListener("click", onTap);
