@@ -64,9 +64,8 @@ const els = {
   serverBubble:document.querySelector("#serverBubble"),
   cookBubble:document.querySelector("#cookBubble"),
   toast:document.querySelector("#toast"),
-  levelsButton:document.querySelector("#levelsButton"),
-  restartButton:document.querySelector("#restartButton"),
-  startButton:document.querySelector("#startButton"),
+  settingsButton:document.querySelector("#settingsButton"),
+  pauseButton:document.querySelector("#pauseButton"),
   modal:document.querySelector("#modal"),
   modalIcon:document.querySelector("#modalIcon"),
   modalTitle:document.querySelector("#modalTitle"),
@@ -93,11 +92,11 @@ function createState(levelIndex){
   const lvl = LEVELS[levelIndex];
   const layout = TABLE_LAYOUTS[lvl.tables];
   return {
-    levelIndex, running:false, ended:false, cash:0, spawned:0, resolved:0, nextId:1, nextSpawnAt:0, ordersTaken:0,
+    levelIndex, running:false, paused:false, pausedAt:0, ended:false, cash:0, spawned:0, resolved:0, nextId:1, nextSpawnAt:0, ordersTaken:0,
     selectedWaitingId:null, selectedCarrySlot:null, selectedBurgerSlot:0,
     waiting:[], pass:[], carry:[null,null],
-    server:{busy:false, x:20, y:54, token:0},
-    cook:{busy:false, x:76, y:81, token:0},
+    server:{busy:false, x:18, y:50, token:0, completeAt:0},
+    cook:{busy:false, x:76, y:81, token:0, completeAt:0},
     tables:layout.map((p,i)=>({ id:i+1, x:p.x, y:p.y, state:"empty", customer:null, order:[], served:[], eatingUntil:0, cleaningUntil:0 })),
     burgerSlots:[blankBurgerSlot(), blankBurgerSlot()],
     grill:{state:"idle", startedAt:0, readyAt:0, burnAt:0},
@@ -133,59 +132,102 @@ function bubble(kind,text,ms=850){
   el.classList.remove("hidden");
   setTimeout(()=>el.classList.add("hidden"), ms);
 }
-function openModal(){ els.modal.classList.add("open"); }
+function openModal(mode="dialog"){
+  els.modal.dataset.mode = mode;
+  els.modal.classList.add("open");
+}
 function closeModal(){ els.modal.classList.remove("open"); }
-
-function burgerOrder(toppings=[]){ return { key:"burger", toppings:[...toppings] }; }
-function simpleOrder(key){ return { key }; }
-function cloneOrder(order){ return order.map(item=> item.key==="burger" ? burgerOrder(item.toppings) : simpleOrder(item.key)); }
-function toppingSignature(toppings=[]){ return [...toppings].sort().join("|"); }
-function itemMatches(prepared, ordered){
-  if(!prepared || !ordered || prepared.key !== ordered.key) return false;
-  if(ordered.key !== "burger") return true;
-  return toppingSignature(prepared.toppings) === toppingSignature(ordered.toppings);
-}
-function burgerVariantLabel(toppings=[]){
-  if(!toppings.length) return "Plain";
-  const hasL = toppings.includes("lettuce");
-  const hasT = toppings.includes("tomato");
-  if(hasL && hasT) return "Lettuce + tomato";
-  if(hasL) return "Lettuce";
-  if(hasT) return "Tomato";
-  return "Plain";
-}
-function randomBurgerOrder(){
-  const available = LEVELS[state.levelIndex].burgerToppings || [];
-  return burgerOrder(available.filter(()=>Math.random()<.5));
-}
-function preparedDescription(item){
-  if(item.key !== "burger") return ITEMS[item.key].name;
-  return `${burgerVariantLabel(item.toppings)} burger`;
+function setModalButtons(primaryVisible=true, secondaryVisible=false){
+  els.modalPrimary.classList.toggle("hidden", !primaryVisible);
+  els.modalSecondary.classList.toggle("hidden", !secondaryVisible);
 }
 
-function showIntro(){
+function shiftAbsolute(value, delta){ return value ? value + delta : value; }
+function shiftPauseTimers(delta){
+  state.nextSpawnAt = shiftAbsolute(state.nextSpawnAt, delta);
+  state.tables.forEach(table=>{
+    table.eatingUntil = shiftAbsolute(table.eatingUntil, delta);
+    table.cleaningUntil = shiftAbsolute(table.cleaningUntil, delta);
+  });
+  for(const obj of [state.grill,state.coffee,state.fries,state.pancakes]){
+    obj.startedAt = shiftAbsolute(obj.startedAt, delta);
+    obj.readyAt = shiftAbsolute(obj.readyAt, delta);
+    obj.burnAt = shiftAbsolute(obj.burnAt, delta);
+  }
+  state.server.completeAt = shiftAbsolute(state.server.completeAt, delta);
+  state.cook.completeAt = shiftAbsolute(state.cook.completeAt, delta);
+}
+function pauseGame(){
+  if(!state.running || state.paused) return;
+  state.paused = true;
+  state.pausedAt = clock();
+  if(raf) cancelAnimationFrame(raf);
+  raf = 0;
+}
+function resumeGame(){
+  if(!state.running){ closeModal(); return; }
+  if(!state.paused){ closeModal(); return; }
+  const now = clock();
+  const delta = now - state.pausedAt;
+  shiftPauseTimers(delta);
+  state.paused = false;
+  state.pausedAt = 0;
+  lastFrame = now;
+  closeModal();
+  raf = requestAnimationFrame(loop);
+}
+
+function showStartMenu(){
   const lvl = LEVELS[state.levelIndex];
-  els.modalIcon.textContent = "🍳";
-  els.modalTitle.textContent = `Level ${state.levelIndex+1}: ${lvl.name}`;
-  els.modalText.textContent = "Orders and kitchen parts now use matching visuals. Build the burger to match what the customer sees.";
-  els.modalDetails.innerHTML = `
-    <div class="instruction"><span>🎟️</span><strong>Read the order ticket visually. Plain, lettuce, tomato, and lettuce + tomato burgers all look different.</strong></div>
-    <div class="instruction"><span>🍔</span><strong>Burger: bun + cooked patty are required. Add only the toppings shown.</strong></div>
-    <div class="instruction"><span>☕</span><strong>Coffee: grab a cup → brew → tap ready coffee to put it on the pass.</strong></div>
-    ${lvl.menu.includes("fries") ? '<div class="instruction"><span>🍟</span><strong>Fries: fryer → pull basket → salt → portion.</strong></div>' : ""}
-    ${lvl.menu.includes("pancakes") ? '<div class="instruction"><span>🥞</span><strong>Pancakes: pour → flip → plate → syrup.</strong></div>' : ""}
-  `;
-  els.modalPrimary.textContent = "Start Shift";
+  els.modalIcon.textContent = "🍔";
+  els.modalTitle.textContent = "ORDER UP!";
+  els.modalText.textContent = `Level ${state.levelIndex+1}: ${lvl.name}`;
+  els.modalDetails.innerHTML = "";
+  els.modalPrimary.textContent = "Play";
   els.modalPrimary.onclick = ()=>{ closeModal(); startLevel(state.levelIndex); };
-  els.modalSecondary.classList.add("hidden");
-  openModal();
+  setModalButtons(true,false);
+  openModal("start");
+}
+
+function showPauseMenu(){
+  if(!state.running) return;
+  pauseGame();
+  els.modalIcon.textContent = "⏸";
+  els.modalTitle.textContent = "Paused";
+  els.modalText.textContent = "";
+  els.modalDetails.innerHTML = "";
+  els.modalPrimary.textContent = "Resume";
+  els.modalPrimary.onclick = resumeGame;
+  setModalButtons(true,false);
+  openModal("pause");
+}
+
+function showSettingsMenu(){
+  if(state.running) pauseGame();
+  els.modalIcon.textContent = "⚙️";
+  els.modalTitle.textContent = "Settings";
+  els.modalText.textContent = "";
+  els.modalDetails.innerHTML = `
+    <button id="settingsResume" class="menu-action">${state.running ? "Resume" : "Close"}</button>
+    <button id="settingsLevels" class="menu-action">Levels</button>
+    <button id="settingsRestart" class="menu-action danger">Restart Level</button>
+  `;
+  setModalButtons(false,false);
+  document.querySelector("#settingsResume").onclick = ()=> state.running ? resumeGame() : closeModal();
+  document.querySelector("#settingsLevels").onclick = showLevels;
+  document.querySelector("#settingsRestart").onclick = ()=>{
+    closeModal();
+    startLevel(state.levelIndex);
+  };
+  openModal("settings");
 }
 
 function showLevels(){
+  if(state.running) pauseGame();
   const unlocked = Math.max(1, save.unlocked || 1);
   els.modalIcon.textContent = "🧾";
-  els.modalTitle.textContent = "Choose a Shift";
-  els.modalText.textContent = "The kitchen gets busier as new dishes unlock.";
+  els.modalTitle.textContent = "Levels";
+  els.modalText.textContent = "";
   els.modalDetails.innerHTML = LEVELS.map((lvl,i)=>{
     const n=i+1, stars=save.bestStars?.[n]||0, locked=n>unlocked;
     return `<button class="level-option" data-level="${i}" ${locked?"disabled":""}>
@@ -199,13 +241,12 @@ function showLevels(){
     save.lastLevel = i+1;
     persist();
     render();
-    closeModal();
-    showIntro();
+    showStartMenu();
   }));
-  els.modalPrimary.textContent = "Close";
-  els.modalPrimary.onclick = closeModal;
-  els.modalSecondary.classList.add("hidden");
-  openModal();
+  els.modalPrimary.textContent = "Back";
+  els.modalPrimary.onclick = showSettingsMenu;
+  setModalButtons(true,false);
+  openModal("levels");
 }
 
 function menuText(key){
@@ -220,6 +261,8 @@ function startLevel(index){
   if(raf) cancelAnimationFrame(raf);
   state = createState(index);
   state.running = true;
+  state.paused = false;
+  state.pausedAt = 0;
   state.nextSpawnAt = clock() + 650;
   save.lastLevel = index + 1;
   persist();
@@ -229,7 +272,7 @@ function startLevel(index){
   raf = requestAnimationFrame(loop);
 }
 function loop(t){
-  if(!state.running) return;
+  if(!state.running || state.paused) return;
   const dt = Math.min(.18, (t-lastFrame)/1000);
   lastFrame = t;
   const lvl = LEVELS[state.levelIndex];
@@ -363,19 +406,27 @@ function moveWorker(kind,x,y,label,callback,duration=430){
   data.busy = true;
   data.token++;
   const token = data.token;
-  data.x = x; data.y = y;
+  data.x = x;
+  data.y = y;
+  data.completeAt = clock() + duration;
   const el = kind==="server" ? els.server : els.cook;
   el.classList.add("busy");
   bubble(kind,label,Math.max(700,duration));
   renderWorkers();
-  setTimeout(()=>{
+
+  const finishWhenReady = ()=>{
     if(!state.running || data.token!==token) return;
+    if(state.paused){ setTimeout(finishWhenReady,80); return; }
+    const remaining = data.completeAt - clock();
+    if(remaining>8){ setTimeout(finishWhenReady,Math.min(remaining,80)); return; }
     try{ callback?.(); } finally {
       data.busy = false;
+      data.completeAt = 0;
       el.classList.remove("busy");
       render();
     }
-  }, duration);
+  };
+  setTimeout(finishWhenReady,duration);
   return true;
 }
 
@@ -718,10 +769,10 @@ function endLevel(){
     els.modalPrimary.textContent = "Retry";
     els.modalPrimary.onclick = ()=>{ closeModal(); startLevel(state.levelIndex); };
   }
-  els.modalSecondary.textContent = "Levels";
+  els.modalSecondary.textContent = "Main Menu";
   els.modalSecondary.classList.remove("hidden");
-  els.modalSecondary.onclick = showLevels;
-  openModal();
+  els.modalSecondary.onclick = ()=>{ state = createState(state.levelIndex); render(); showStartMenu(); };
+  openModal("results");
 }
 
 function render(){
@@ -729,7 +780,6 @@ function render(){
   els.levelLabel.textContent = `Level ${state.levelIndex+1}: ${lvl.name}`;
   els.cashLabel.textContent = `$${state.cash}`;
   els.goalLabel.textContent = `$${state.cash} / $${lvl.goal}`;
-  els.startButton.textContent = state.running ? "Running" : "Start Shift";
   renderMenuBoard();
   renderWaiting();
   renderTables();
@@ -978,17 +1028,13 @@ function renderWorkers(){
 function patienceColor(pct){ if(pct>55) return "#5d9869"; if(pct>27) return "#e2a53d"; return "#b44136"; }
 
 els.carrySlots.forEach((btn,i)=> btn.addEventListener("click", ()=>onCarryTap(i)));
-els.levelsButton.addEventListener("click", showLevels);
-els.restartButton.addEventListener("click", ()=>{
-  if(!state.running){ startLevel(state.levelIndex); return; }
-  if(confirm("Restart this level?")) startLevel(state.levelIndex);
-});
-els.startButton.addEventListener("click", ()=>{ if(!state.running) startLevel(state.levelIndex); });
+els.settingsButton.addEventListener("click", showSettingsMenu);
+els.pauseButton.addEventListener("click", showPauseMenu);
 
 if("serviceWorker" in navigator){
   window.addEventListener("load", ()=> navigator.serviceWorker.register("./sw.js").catch(()=>{}));
 }
 
 render();
-showIntro();
+showStartMenu();
 })();

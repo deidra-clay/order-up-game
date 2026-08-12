@@ -11,7 +11,7 @@
   <title>Order Up!</title>
   <link rel="manifest" href="./manifest.json">
   <link rel="icon" href="./icon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="./style.css?v=4.0">
+  <link rel="stylesheet" href="./style.css?v=4.1">
 </head>
 <body>
   <main id="app">
@@ -22,6 +22,11 @@
       </div>
       <div class="hud-pill"><span>💵</span><strong id="cashLabel">$0</strong></div>
       <div class="hud-pill goal"><span>⭐</span><strong id="goalLabel">$0 / $70</strong></div>
+      <div class="hud-spacer"></div>
+      <div class="corner-controls">
+        <button id="settingsButton" class="compact-control" aria-label="Settings">⚙️</button>
+        <button id="pauseButton" class="compact-control" aria-label="Pause">⏸</button>
+      </div>
     </header>
 
     <section class="restaurant-shell">
@@ -80,28 +85,22 @@
           </div>
         </div>
 
-        <div id="toast" class="toast">Tap Start Shift when you're ready.</div>
+        <div id="toast" class="toast">The diner is ready.</div>
       </div>
     </section>
-
-    <footer class="controls">
-      <button id="levelsButton" class="secondary-button">Levels</button>
-      <button id="restartButton" class="secondary-button">Restart</button>
-      <button id="startButton" class="primary-button">Start Shift</button>
-    </footer>
   </main>
 
-  <div id="modal" class="modal open" role="dialog" aria-modal="true">
+  <div id="modal" class="modal open" role="dialog" aria-modal="true" data-mode="start">
     <div class="modal-card">
-      <div id="modalIcon" class="modal-icon">🍽️</div>
-      <h1 id="modalTitle">Order Up!</h1>
+      <div id="modalIcon" class="modal-icon">🍔</div>
+      <h1 id="modalTitle">ORDER UP!</h1>
       <p id="modalText"></p>
       <div id="modalDetails" class="modal-details"></div>
       <button id="modalPrimary" class="primary-button">Play</button>
-      <button id="modalSecondary" class="secondary-button hidden">Levels</button>
+      <button id="modalSecondary" class="secondary-button hidden">Back</button>
     </div>
   </div>
 
-  <script src="./game.js?v=4.0"></script>
+  <script src="./game.js?v=4.1"></script>
 </body>
 </html>
