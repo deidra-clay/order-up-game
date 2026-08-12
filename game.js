@@ -31,16 +31,16 @@ const TABLE_LAYOUTS = {
 };
 
 const STATION_POS = {
-  grill:{x:22,y:71,label:"GRILL"},
-  bun:{x:31,y:71,label:"BUN"},
-  lettuce:{x:40,y:71,label:"LETTUCE"},
-  tomato:{x:49,y:71,label:"TOMATO"},
-  cup:{x:22,y:83,label:"GRAB CUP"},
-  coffee:{x:31,y:83,label:"BREWER"},
-  fryer:{x:40,y:83,label:"FRYER"},
-  salt:{x:49,y:83,label:"SALT"},
-  griddle:{x:58,y:83,label:"GRIDDLE"},
-  syrup:{x:67,y:83,label:"SYRUP"}
+  grill:{x:19,y:72,label:"GRILL"},
+  bun:{x:27,y:72,label:"BUN"},
+  lettuce:{x:35,y:72,label:"LETTUCE"},
+  tomato:{x:43,y:72,label:"TOMATO"},
+  cup:{x:19,y:86,label:"GRAB CUP"},
+  coffee:{x:27,y:86,label:"BREWER"},
+  fryer:{x:35,y:86,label:"FRYER"},
+  salt:{x:43,y:86,label:"SALT"},
+  griddle:{x:51,y:86,label:"GRIDDLE"},
+  syrup:{x:59,y:86,label:"SYRUP"}
 };
 
 const NAMES=["Maya","Theo","Nina","Jay","Lena","Omar","Riley","Sam","Ari","Tess","Miles","Zoe","Kai","Ivy","Noah","Mina"];
@@ -96,7 +96,7 @@ function createState(levelIndex){
     selectedWaitingId:null, selectedCarrySlot:null, selectedBurgerSlot:0,
     waiting:[], pass:[], carry:[null,null],
     server:{busy:false, x:18, y:50, token:0, completeAt:0},
-    cook:{busy:false, x:76, y:81, token:0, completeAt:0},
+    cook:{busy:false, x:66, y:85, token:0, completeAt:0},
     tables:layout.map((p,i)=>({ id:i+1, x:p.x, y:p.y, state:"empty", customer:null, order:[], served:[], eatingUntil:0, cleaningUntil:0 })),
     burgerSlots:[blankBurgerSlot(), blankBurgerSlot()],
     grill:{state:"idle", startedAt:0, readyAt:0, burnAt:0},
@@ -175,6 +175,21 @@ function resumeGame(){
   lastFrame = now;
   closeModal();
   raf = requestAnimationFrame(loop);
+}
+
+
+async function tryLockLandscape(){
+  try{
+    if(screen.orientation && screen.orientation.lock){
+      await screen.orientation.lock("landscape");
+    }
+  }catch{}
+}
+function handleOrientationChange(){
+  const portrait = window.matchMedia("(orientation: portrait)").matches;
+  if(portrait && state.running && !state.paused){
+    pauseGame();
+  }
 }
 
 function showStartMenu(){
@@ -258,6 +273,7 @@ function menuText(key){
 }
 
 function startLevel(index){
+  tryLockLandscape();
   if(raf) cancelAnimationFrame(raf);
   state = createState(index);
   state.running = true;
@@ -895,8 +911,7 @@ function stationEl(name, visualState, label, progress, onTap){
   const pos = STATION_POS[name];
   const btn = document.createElement("button");
   btn.className = `station ${visualState||""}`;
-  btn.style.left = `calc(${pos.x}% - 25px)`;
-  btn.style.top = `calc(${pos.y}% - 27px)`;
+  btn.dataset.station = name;
   btn.innerHTML = `
     <div class="station-timer"><span style="width:${progress||0}%"></span></div>
     <div class="station-box"></div>
@@ -1030,6 +1045,8 @@ function patienceColor(pct){ if(pct>55) return "#5d9869"; if(pct>27) return "#e2
 els.carrySlots.forEach((btn,i)=> btn.addEventListener("click", ()=>onCarryTap(i)));
 els.settingsButton.addEventListener("click", showSettingsMenu);
 els.pauseButton.addEventListener("click", showPauseMenu);
+window.addEventListener("orientationchange", ()=>setTimeout(handleOrientationChange,80));
+window.matchMedia("(orientation: portrait)").addEventListener?.("change", handleOrientationChange);
 
 if("serviceWorker" in navigator){
   window.addEventListener("load", ()=> navigator.serviceWorker.register("./sw.js").catch(()=>{}));

@@ -390,238 +390,320 @@ button:active{transform:scale(.98)}
 }
 
 
-/* ==== V4 landscape layout ==== */
-#app{
-  width:100vw;
-  height:100dvh;
-  margin:0;
-  max-width:none;
-  display:grid;
-  grid-template-columns:230px 1fr;
-  grid-template-rows:1fr auto;
-  background:#271d16;
-}
-.hud{
-  grid-column:1;
-  grid-row:1;
-  display:flex;
-  flex-direction:column;
-  gap:10px;
-  padding:max(8px,env(safe-area-inset-top)) 8px 8px max(8px,env(safe-area-inset-left));
-  background:#271d16;
-}
-.brand,.hud-pill{
-  min-height:64px;
-  border-radius:16px;
-}
-.brand{padding:10px 12px}
-.brand-title{font-size:.78rem}
-#levelLabel{font-size:.95rem}
-.hud-pill{font-size:1rem}
-.hud-pill.goal{font-size:.92rem}
-
-.restaurant-shell{
-  grid-column:2;
-  grid-row:1 / span 2;
-  min-height:0;
-  padding:10px 10px 10px 0;
-  background:#271d16;
-}
-.restaurant{
-  min-height:0;
-  height:100%;
-  border-radius:18px;
-}
-.dining-floor{inset:0 0 42% 0}
-.kitchen-floor{height:42%}
-.kitchen-wall{bottom:42%}
-.controls{
-  grid-column:1;
-  grid-row:2;
-  display:grid;
-  grid-template-columns:1fr;
-  gap:8px;
-  padding:8px max(8px,env(safe-area-inset-right)) max(8px,env(safe-area-inset-bottom)) max(8px,env(safe-area-inset-left));
-  background:#271d16;
-}
-.primary-button,.secondary-button{min-height:54px;font-size:1rem}
-
-.sign{top:4%;padding:6px 16px;font-size:.86rem}
-.window{top:6%;width:12%;height:12%}
-.window-a{left:25%}
-.window-b{right:7%}
-.door{top:6%;left:3%;width:10%;height:17%}
-.door span{font-size:.6rem}
-.wait-rug{top:20%;left:3%;width:11%;height:28%}
-.waiting-line{top:21%;left:4%;width:8%;height:23%}
-.waiting-customer{width:60px}
-.customer-name-tag{font-size:.55rem}
-.host-stand{left:3%;top:53%;width:11%;height:12%;font-size:1.15rem}
-.host-stand small{font-size:.52rem}
-.plant-b{top:59%;left:14%}
-
-.table{width:98px;height:78px}
-.tabletop{left:8px;right:8px;top:14px;bottom:12px}
-.table-bubble{min-width:106px;max-width:190px;bottom:64px;font-size:.56rem;padding:6px 8px}
-.ticket-title{font-size:.5rem}
-.ticket-subtitle{font-size:.43rem}
-.seated-customer{font-size:1.85rem}
-.table-number{font-size:.47rem;top:33px}
-.table-patience{left:22px;right:22px;bottom:3px}
-
-.kitchen-label{left:2.2%;bottom:38%;font-size:.86rem}
-.menu-board{left:2%;bottom:9%;width:12%;min-height:20%;font-size:.6rem;padding:10px 8px;gap:5px}
-.menu-board strong{font-size:.7rem}
-.pass-counter{right:21.5%;bottom:44.5%;width:26%;min-height:70px}
-.pass-label{font-size:.58rem}
-.pass-slots{min-height:46px;gap:6px}
-.pass-item{flex:0 0 56px;min-height:46px}
-.empty-pass{font-size:.5rem;padding-top:12px}
-
-.station{width:60px;height:60px}
-.station-box{inset:8px 2px 2px}
-.station-icon{top:10px;min-height:28px}
-.station-name{bottom:6px;font-size:.36rem}
-.station-timer{left:8px;right:8px;top:4px}
-
-.burger-prep{right:2%;bottom:4%;width:18%;min-height:30%}
-.counter-title{font-size:.6rem}
-.prep-slot{min-height:128px}
-.prep-slot .prep-name{font-size:.46rem}
-.prep-slot .prep-note{font-size:.4rem}
-.side-prep-area{left:auto;right:21.5%;bottom:5%;width:15%;gap:8px}
-.side-prep{min-height:54px;font-size:.43rem}
-.carry-tray{left:2%;bottom:3%;width:12%;height:16%}
-.tray-label{font-size:.42rem}
-
-.worker{width:64px}
-.worker-person{font-size:2.25rem}
-.worker-label{font-size:.42rem}
-.worker-bubble{bottom:52px;font-size:.45rem}
-.toast{top:2%;width:52%;font-size:.68rem}
-
-@media (max-height: 500px){
-  #app{grid-template-columns:205px 1fr}
-  .brand,.hud-pill{min-height:58px}
-  .restaurant-shell{padding:8px 8px 8px 0}
-  .table{transform:scale(.94)}
-  .station{width:56px;height:56px}
-  .prep-slot{min-height:116px}
-}
 
 
-/* ==== V4.1 compact full-width landscape UI ==== */
+/* ==== V4.2 landscape-only safe-area grid layout ==== */
+html,body{width:100%;height:100%;overflow:hidden;background:#271d16}
+body{min-height:100dvh}
+
+.rotate-gate{display:none}
+
 #app{
   width:100vw;
   height:100dvh;
   max-width:none;
   margin:0;
+  padding:
+    max(6px,env(safe-area-inset-top))
+    max(10px,env(safe-area-inset-right))
+    max(6px,env(safe-area-inset-bottom))
+    max(10px,env(safe-area-inset-left));
   display:grid;
   grid-template-columns:1fr;
-  grid-template-rows:58px minmax(0,1fr);
+  grid-template-rows:50px minmax(0,1fr);
+  gap:6px;
   background:#271d16;
 }
+
 .hud{
   grid-column:1;
   grid-row:1;
   display:flex;
   flex-direction:row;
   align-items:center;
-  gap:8px;
-  padding:max(5px,env(safe-area-inset-top)) max(8px,env(safe-area-inset-right)) 5px max(8px,env(safe-area-inset-left));
+  gap:7px;
+  padding:0;
   background:#271d16;
   z-index:80;
 }
 .brand,.hud-pill{
-  min-height:44px;
-  height:44px;
-  border-radius:13px;
+  min-height:42px;
+  height:42px;
+  border-radius:12px;
   flex:none;
 }
-.brand{width:210px;padding:5px 10px}
-.brand-title{font-size:.62rem}
-#levelLabel{font-size:.72rem}
-.hud-pill{min-width:92px;padding:0 11px;font-size:.78rem}
-.hud-pill.goal{min-width:126px;font-size:.72rem}
-.hud-spacer{flex:1}
-.corner-controls{display:flex;gap:7px;align-items:center}
+.brand{width:190px;padding:4px 9px}
+.brand-title{font-size:.58rem}
+#levelLabel{font-size:.68rem}
+.hud-pill{min-width:84px;padding:0 10px;font-size:.74rem}
+.hud-pill.goal{min-width:116px;font-size:.68rem}
+.hud-spacer{flex:1;min-width:4px}
+.corner-controls{display:flex;gap:6px;align-items:center}
 .compact-control{
-  width:43px;height:43px;border-radius:13px;border:1px solid rgba(255,255,255,.17);
-  background:rgba(255,255,255,.08);color:white;font-size:1.05rem;font-weight:900;
+  width:40px;height:40px;border-radius:12px;border:1px solid rgba(255,255,255,.17);
+  background:rgba(255,255,255,.08);color:white;font-size:1rem;font-weight:900;
 }
+
 .restaurant-shell{
   grid-column:1;
   grid-row:2;
   min-height:0;
-  padding:0 8px max(8px,env(safe-area-inset-bottom));
+  padding:0;
   background:#271d16;
 }
-.restaurant{height:100%;min-height:0;border-radius:17px}
-.controls{display:none!important}
-
-.dining-floor{inset:0 0 41% 0}
-.kitchen-floor{height:41%}
-.kitchen-wall{bottom:41%}
-.sign{top:3%;font-size:.77rem;padding:5px 13px}
-.window{top:5%;width:11%;height:12%}
-.window-a{left:27%}.window-b{right:7%}
-.door{top:5%;left:2%;width:8%;height:18%}
-.wait-rug{top:21%;left:2%;width:9%;height:27%}
-.waiting-line{top:22%;left:2.8%;width:7.5%;height:22%}
-.waiting-customer{width:55px}
-.host-stand{left:2%;top:51%;width:9%;height:12%}
-.plant-b{top:56%;left:11.5%}
-
-.table{width:92px;height:74px}
-.table-bubble{min-width:96px;max-width:170px;bottom:61px;padding:5px 7px}
-.ticket-title{font-size:.47rem}.ticket-subtitle{font-size:.39rem}
-
-.kitchen-label{left:1.2%;bottom:37%;font-size:.72rem}
-.menu-board{left:1.2%;bottom:3%;width:10%;min-height:23%;font-size:.52rem;padding:7px;gap:4px}
-.menu-board strong{font-size:.62rem}
-.carry-tray{left:12.2%;bottom:3%;width:10%;height:18%}
-.tray-label{font-size:.38rem}
-.pass-counter{right:20.5%;bottom:42%;width:24%;min-height:61px;padding-top:14px}
-.pass-label{font-size:.5rem}
-.pass-slots{min-height:38px}.pass-item{flex-basis:48px;min-height:38px}
-
-.station{width:54px;height:55px}
-.station-name{font-size:.32rem}
-.station-icon{min-height:24px}
-.burger-prep{right:1.2%;bottom:3%;width:17.5%;min-height:29%;padding:7px 5px}
-.counter-title{font-size:.52rem}
-.prep-slot{min-height:112px}
-.prep-slot .prep-name{font-size:.4rem}
-.prep-slot .prep-note{font-size:.34rem}
-.side-prep-area{left:auto;right:19.5%;bottom:3%;width:10%;gap:5px}
-.side-prep{min-height:47px;font-size:.36rem}
-
-.worker{width:56px}.worker-person{font-size:2rem}.worker-label{font-size:.36rem}
-.toast{top:1.5%;width:42%;font-size:.58rem}
-
-.modal{padding:14px}
-.modal-card{width:min(330px,92vw);padding:20px;border-radius:22px}
-.modal[data-mode="start"] .modal-card{
-  width:min(360px,92vw);
-  background:linear-gradient(180deg,#fff8e9,#f3dfbb);
-  border:3px solid #7e5438;
+.restaurant{
+  position:relative;
+  width:100%;
+  height:100%;
+  min-height:0;
+  overflow:hidden;
+  border-radius:16px;
 }
-.modal[data-mode="start"] .modal-icon{font-size:3.7rem}
-.modal[data-mode="start"] .modal-card h1{font-size:2rem;letter-spacing:.08em;margin-bottom:3px}
-.modal[data-mode="start"] .modal-card p{font-size:.95rem;font-weight:800;color:#604936;margin:4px 0 18px}
-.modal[data-mode="pause"] .modal-card,.modal[data-mode="settings"] .modal-card{width:min(300px,90vw)}
-.modal-details:empty{display:none}
-.menu-action{
-  width:100%;min-height:48px;border-radius:13px;border:1px solid #b99c7b;background:#fffaf1;
-  font-weight:900;font-size:.9rem;padding:8px 12px
-}
-.menu-action.danger{color:#9d392d;background:#fff0ea}
 
-@media(max-height:480px){
-  #app{grid-template-rows:52px minmax(0,1fr)}
-  .hud{padding-top:4px;padding-bottom:4px}
-  .brand,.hud-pill{height:40px;min-height:40px}
-  .compact-control{width:39px;height:39px}
-  .prep-slot{min-height:100px}
-  .burger-prep{min-height:27%}
+/* room split */
+.dining-floor{inset:0 0 42% 0}
+.kitchen-floor{height:42%}
+.kitchen-wall{bottom:42%}
+
+/* dining room */
+.sign{top:3%;font-size:.72rem;padding:5px 13px}
+.window{top:5%;width:10%;height:12%}
+.window-a{left:28%}.window-b{right:7%}
+.door{top:5%;left:1.6%;width:7.5%;height:18%}
+.wait-rug{top:21%;left:1.6%;width:8.5%;height:27%}
+.waiting-line{top:22%;left:2.3%;width:7%;height:22%}
+.waiting-customer{width:54px}
+.customer-name-tag{font-size:.5rem}
+.host-stand{left:1.6%;top:51%;width:8.5%;height:12%}
+.plant-b{top:56%;left:10.5%}
+
+.table{width:90px;height:72px}
+.table-bubble{min-width:94px;max-width:160px;bottom:60px;padding:5px 7px}
+.ticket-title{font-size:.45rem}.ticket-subtitle{font-size:.38rem}
+.seated-customer{font-size:1.72rem}
+
+/* pass owns its own strip; nothing from kitchen can overlap it */
+.pass-counter{
+  position:absolute;
+  left:50%;
+  right:auto;
+  transform:translateX(-50%);
+  bottom:43.2%;
+  width:27%;
+  min-height:56px;
+  padding:14px 5px 5px;
+  z-index:9;
+}
+.pass-label{font-size:.48rem}
+.pass-slots{min-height:34px;gap:5px}
+.pass-item{flex:0 0 44px;min-height:34px}
+.empty-pass{font-size:.38rem;padding-top:7px}
+
+/* the entire kitchen now uses a non-overlapping CSS grid */
+.kitchen-layout{
+  position:absolute;
+  left:1.2%;
+  right:1.2%;
+  bottom:1.6%;
+  height:37.5%;
+  display:grid;
+  grid-template-columns:minmax(104px,12%) minmax(370px,48%) minmax(92px,12%) minmax(220px,28%);
+  gap:8px;
+  align-items:stretch;
+  z-index:5;
+  min-width:0;
+}
+.kitchen-left-zone,
+.kitchen-stations-zone,
+.side-prep-area,
+.burger-prep{min-width:0;min-height:0}
+
+.kitchen-left-zone{
+  display:grid;
+  grid-template-rows:minmax(0,1fr) minmax(0,.8fr);
+  gap:7px;
+}
+.menu-board{
+  position:relative;
+  inset:auto;
+  width:100%;
+  height:100%;
+  min-height:0;
+  padding:7px;
+  font-size:.49rem;
+  gap:3px;
+  overflow:hidden;
+}
+.menu-board strong{font-size:.58rem}
+.carry-tray{
+  position:relative;
+  inset:auto;
+  width:100%;
+  height:100%;
+  min-height:0;
+  padding:14px 5px 5px;
+}
+.tray-label{font-size:.35rem}
+.carry-slots{min-height:0}
+.carry-slot{min-width:0}
+
+.kitchen-stations-zone{
+  position:relative;
+  display:grid;
+  grid-template-rows:18px minmax(0,1fr);
+  gap:4px;
+  padding:5px;
+  border:2px solid rgba(96,89,79,.38);
+  border-radius:10px;
+  background:rgba(255,255,255,.16);
+  overflow:hidden;
+}
+.kitchen-label{
+  position:static;
+  color:rgba(74,65,54,.58);
+  font-weight:1000;
+  letter-spacing:.12em;
+  font-size:.52rem;
+  line-height:16px;
+  text-align:center;
+}
+.stations-layer{
+  position:relative;
+  inset:auto;
+  display:grid;
+  grid-template-columns:repeat(6,minmax(0,1fr));
+  grid-template-rows:repeat(2,minmax(0,1fr));
+  gap:5px;
+  min-width:0;
+  min-height:0;
+  overflow:hidden;
+}
+.station{
+  position:relative;
+  inset:auto!important;
+  width:100%;
+  height:100%;
+  min-width:0;
+  min-height:48px;
+  padding:0;
+}
+.station[data-station="grill"]{grid-column:1;grid-row:1}
+.station[data-station="bun"]{grid-column:2;grid-row:1}
+.station[data-station="lettuce"]{grid-column:3;grid-row:1}
+.station[data-station="tomato"]{grid-column:4;grid-row:1}
+.station[data-station="cup"]{grid-column:1;grid-row:2}
+.station[data-station="coffee"]{grid-column:2;grid-row:2}
+.station[data-station="fryer"]{grid-column:3;grid-row:2}
+.station[data-station="salt"]{grid-column:4;grid-row:2}
+.station[data-station="griddle"]{grid-column:5;grid-row:2}
+.station[data-station="syrup"]{grid-column:6;grid-row:2}
+.station-box{inset:7px 2px 2px}
+.station-icon{top:9px;min-height:23px}
+.station-name{bottom:5px;font-size:.29rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.station-timer{left:6px;right:6px;top:3px}
+
+.side-prep-area{
+  position:relative;
+  inset:auto;
+  width:100%;
+  height:100%;
+  display:grid;
+  grid-auto-rows:minmax(45px,1fr);
+  gap:6px;
+  align-content:center;
+  overflow:hidden;
+}
+.side-prep{min-width:0;min-height:45px;font-size:.33rem;padding:4px}
+.side-prep .big{font-size:1.05rem}
+
+.burger-prep{
+  position:relative;
+  inset:auto;
+  width:100%;
+  height:100%;
+  min-height:0;
+  padding:7px;
+  overflow:hidden;
+  display:grid;
+  grid-template-rows:18px minmax(0,1fr);
+}
+.counter-title{font-size:.5rem;line-height:16px;margin:0}
+.burger-prep-slots{
+  width:100%;
+  min-width:0;
+  min-height:0;
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:7px;
+  align-items:stretch;
+  justify-items:stretch;
+  overflow:hidden;
+}
+.prep-slot{
+  width:100%;
+  min-width:0;
+  min-height:0;
+  height:100%;
+  padding:4px;
+  justify-content:center;
+  overflow:hidden;
+}
+.prep-slot .prep-plate{width:min(58px,75%)}
+.prep-slot .prep-name{font-size:.38rem}
+.prep-slot .prep-note{font-size:.31rem;max-width:100%}
+.burger-visual.large{width:34px}
+
+/* workers remain overlays, but never determine layout */
+.worker{width:52px}
+.worker-person{font-size:1.9rem}
+.worker-label{font-size:.34rem}
+.worker-bubble{bottom:44px;font-size:.37rem}
+.toast{top:1.4%;width:38%;font-size:.55rem}
+
+/* menus */
+.modal{padding:max(12px,env(safe-area-inset-top)) max(12px,env(safe-area-inset-right)) max(12px,env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left))}
+.modal-card{width:min(320px,88vw);padding:18px}
+.modal[data-mode="start"] .modal-card{width:min(350px,88vw)}
+.modal[data-mode="start"] .modal-icon{font-size:3.3rem}
+.modal[data-mode="start"] .modal-card h1{font-size:1.85rem}
+.menu-action{min-height:44px}
+
+/* landscape only. Portrait never exposes the game UI. */
+@media (orientation:portrait){
+  #app,.modal{display:none!important}
+  .rotate-gate{
+    position:fixed;
+    inset:0;
+    display:grid;
+    place-items:center;
+    padding:max(24px,env(safe-area-inset-top)) max(24px,env(safe-area-inset-right)) max(24px,env(safe-area-inset-bottom)) max(24px,env(safe-area-inset-left));
+    background:#271d16;
+    color:#fff8e9;
+    z-index:9999;
+  }
+  .rotate-card{
+    width:min(330px,88vw);
+    padding:26px;
+    border-radius:22px;
+    background:#392d24;
+    border:2px solid rgba(255,255,255,.15);
+    text-align:center;
+    display:grid;
+    gap:8px;
+  }
+  .rotate-phone{font-size:3rem;color:#ffd783}
+  .rotate-card strong{font-size:1.2rem}
+  .rotate-card span{font-size:.85rem;color:#d8c9b7}
+}
+
+@media (orientation:landscape) and (max-height:430px){
+  #app{grid-template-rows:45px minmax(0,1fr);gap:4px}
+  .brand,.hud-pill{height:38px;min-height:38px}
+  .brand{width:175px}
+  .compact-control{width:36px;height:36px}
+  .restaurant{border-radius:14px}
+  .kitchen-layout{height:37%;gap:6px}
+  .station{min-height:42px}
+  .station-name{font-size:.26rem}
+  .prep-slot .prep-note{display:none}
 }

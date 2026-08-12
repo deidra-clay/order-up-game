@@ -1,9 +1,9 @@
-const CACHE_NAME = "order-up-v4-1-compact-ui-20260812-1";
+const CACHE_NAME = "order-up-v4-2-landscape-safe-grid-20260812-1";
 const CORE_ASSETS = [
   "./",
   "./index.html",
-  "./style.css?v=4.1",
-  "./game.js?v=4.1",
+  "./style.css?v=4.2",
+  "./game.js?v=4.2",
   "./manifest.json",
   "./icon.svg"
 ];
