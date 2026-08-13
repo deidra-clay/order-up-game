@@ -709,3 +709,31 @@ body{min-height:100dvh}
   .station-name{font-size:.26rem}
   .prep-slot .prep-note{display:none}
 }
+
+
+/* ==== V4.5 keep order tickets inside the dining room ==== */
+.table{z-index:12}
+.table-bubble{z-index:40}
+.table.bubble-below .table-bubble{
+  top:68px;
+  bottom:auto;
+}
+.table.bubble-below .table-bubble:after{
+  top:-5px;
+  bottom:auto;
+  border-right:0;
+  border-bottom:0;
+  border-left:1px solid #6e5a49;
+  border-top:1px solid #6e5a49;
+}
+.table.bubble-above .table-bubble{
+  top:auto;
+}
+/* Tickets need enough room for multi-item orders but must remain inside the room. */
+.table-bubble{
+  max-width:180px;
+}
+@media (orientation:landscape) and (max-height:430px){
+  .table.bubble-below .table-bubble{top:62px}
+  .table-bubble{max-width:164px}
+}

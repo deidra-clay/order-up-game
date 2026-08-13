@@ -866,7 +866,7 @@ function renderTables(){
   els.tablesLayer.innerHTML="";
   state.tables.forEach(table=>{
     const btn = document.createElement("button");
-    btn.className = `table ${["seated","waitingFood","checkout","dirty"].includes(table.state)?"action":""} ${["dirty","cleaning"].includes(table.state)?"dirty":""}`;
+    btn.className = `table ${table.y < 30 ? "bubble-below" : "bubble-above"} ${["seated","waitingFood","checkout","dirty"].includes(table.state)?"action":""} ${["dirty","cleaning"].includes(table.state)?"dirty":""}`;
     btn.style.left = `calc(${table.x}% - 43px)`;
     btn.style.top = `calc(${table.y}% - 35px)`;
     btn.addEventListener("click", ()=>onTableTap(table.id));
