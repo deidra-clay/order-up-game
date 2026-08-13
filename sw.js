@@ -1,9 +1,9 @@
-const CACHE_NAME = "order-up-v4-2-landscape-safe-grid-20260812-1";
+const CACHE_NAME = "order-up-v4-3-burger-prep-fit-20260813-1";
 const CORE_ASSETS = [
   "./",
   "./index.html",
-  "./style.css?v=4.2",
-  "./game.js?v=4.2",
+  "./style.css?v=4.3",
+  "./game.js?v=4.3",
   "./manifest.json",
   "./icon.svg"
 ];
