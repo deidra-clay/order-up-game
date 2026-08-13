@@ -1,9 +1,9 @@
-const CACHE_NAME = "order-up-v4-5-ticket-position-20260813-1";
+const CACHE_NAME = "order-up-v4-6-partial-prep-visuals-20260813-1";
 const CORE_ASSETS = [
   "./",
   "./index.html",
   "./style.css?v=4.5",
-  "./game.js?v=4.5",
+  "./game.js?v=4.6",
   "./manifest.json",
   "./icon.svg"
 ];

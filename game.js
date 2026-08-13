@@ -896,7 +896,20 @@ function burgerVisualHTML(toppings=[], sizeClass="", partial=null){
   const hasPatty = partial ? partial.patty : true;
   const hasLettuce = partial ? partial.lettuce : toppings.includes("lettuce");
   const hasTomato = partial ? partial.tomato : toppings.includes("tomato");
-  if(!hasBun) return `<div class="burger-placeholder"></div>`;
+
+  const hasAnything = hasBun || hasPatty || hasLettuce || hasTomato;
+  if(!hasAnything) return `<div class="burger-placeholder"></div>`;
+
+  if(partial){
+    return `<div class="burger-visual ${sizeClass}">
+      ${hasBun ? '<div class="burger-layer burger-top"></div>' : ""}
+      ${hasLettuce ? '<div class="burger-layer burger-lettuce"></div>' : ""}
+      ${hasTomato ? '<div class="burger-layer burger-tomato"></div>' : ""}
+      ${hasPatty ? '<div class="burger-layer burger-patty"></div>' : ""}
+      ${hasBun ? '<div class="burger-layer burger-bottom"></div>' : ""}
+    </div>`;
+  }
+
   return `<div class="burger-visual ${sizeClass}">
     <div class="burger-layer burger-top"></div>
     ${hasLettuce ? '<div class="burger-layer burger-lettuce"></div>' : ""}
