@@ -88,6 +88,33 @@ function persist(){ localStorage.setItem("orderUpSaveV3", JSON.stringify(save));
 function clock(){ return performance.now(); }
 function blankBurgerSlot(){ return { bun:false, patty:false, lettuce:false, tomato:false }; }
 
+function burgerOrder(toppings=[]){ return { key:"burger", toppings:[...toppings] }; }
+function simpleOrder(key){ return { key }; }
+function cloneOrder(order){ return order.map(item=> item.key==="burger" ? burgerOrder(item.toppings) : simpleOrder(item.key)); }
+function toppingSignature(toppings=[]){ return [...toppings].sort().join("|"); }
+function itemMatches(prepared, ordered){
+  if(!prepared || !ordered || prepared.key !== ordered.key) return false;
+  if(ordered.key !== "burger") return true;
+  return toppingSignature(prepared.toppings) === toppingSignature(ordered.toppings);
+}
+function burgerVariantLabel(toppings=[]){
+  if(!toppings.length) return "Plain";
+  const hasL = toppings.includes("lettuce");
+  const hasT = toppings.includes("tomato");
+  if(hasL && hasT) return "Lettuce + tomato";
+  if(hasL) return "Lettuce";
+  if(hasT) return "Tomato";
+  return "Plain";
+}
+function randomBurgerOrder(){
+  const available = LEVELS[state.levelIndex].burgerToppings || [];
+  return burgerOrder(available.filter(()=>Math.random()<.5));
+}
+function preparedDescription(item){
+  if(item.key !== "burger") return ITEMS[item.key].name;
+  return `${burgerVariantLabel(item.toppings)} burger`;
+}
+
 function createState(levelIndex){
   const lvl = LEVELS[levelIndex];
   const layout = TABLE_LAYOUTS[lvl.tables];

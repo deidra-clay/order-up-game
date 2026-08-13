@@ -1,9 +1,9 @@
-const CACHE_NAME = "order-up-v4-3-burger-prep-fit-20260813-1";
+const CACHE_NAME = "order-up-v4-4-order-fix-20260813-1";
 const CORE_ASSETS = [
   "./",
   "./index.html",
-  "./style.css?v=4.3",
-  "./game.js?v=4.3",
+  "./style.css?v=4.4",
+  "./game.js?v=4.4",
   "./manifest.json",
   "./icon.svg"
 ];
