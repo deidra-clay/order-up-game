@@ -13,6 +13,13 @@ const TOPPINGS = {
   tomato:{name:"Tomato"}
 };
 
+const PREP_WASTE_COSTS = {
+  bun:1,
+  patty:3,
+  lettuce:1,
+  tomato:1
+};
+
 const LEVELS = [
   {name:"Breakfast Basics",goal:70,customers:4,tables:2,arrivalMs:7800,patience:78,menu:["burger","coffee"],maxItems:2,burgerToppings:["lettuce","tomato"]},
   {name:"Add the Fryer",goal:105,customers:5,tables:2,arrivalMs:7100,patience:74,menu:["burger","coffee","fries"],maxItems:2,burgerToppings:["lettuce","tomato"]},
@@ -484,6 +491,28 @@ function onWaitingTap(id){
   renderWaiting();
 }
 
+function findTrayMatchesForTable(table){
+  const usedOrderIndexes = new Set();
+  const matches = [];
+
+  state.carry.forEach((item,trayIndex)=>{
+    if(!item) return;
+
+    const orderIndex = table.order.findIndex((ordered,i)=>
+      !table.served[i] &&
+      !usedOrderIndexes.has(i) &&
+      itemMatches(item,ordered)
+    );
+
+    if(orderIndex>=0){
+      usedOrderIndexes.add(orderIndex);
+      matches.push({trayIndex,orderIndex});
+    }
+  });
+
+  return matches;
+}
+
 function onTableTap(id){
   if(!state.running) return;
   const table = state.tables.find(t=>t.id===id);
@@ -517,27 +546,28 @@ function onTableTap(id){
   }
 
   if(table.state==="waitingFood"){
-    const slot = state.selectedCarrySlot;
-    if(slot===null || !state.carry[slot]){ toast("Select something on the server tray first."); return; }
-    const item = state.carry[slot];
-    const match = table.order.findIndex((ordered,i)=> itemMatches(item,ordered) && !table.served[i]);
-    if(match<0){
-      beep(180);
-      if(item.key==="burger") toast(`Wrong burger for Table ${table.id}.`);
-      else toast(`Table ${table.id} didn't order that.`);
+    const matches = findTrayMatchesForTable(table);
+
+    if(!matches.length){
+      toast(`Nothing on the server tray matches Table ${table.id}.`);
       return;
     }
+
     moveWorker("server", table.x-4, table.y+7, "Serving", ()=>{
-      table.served[match] = true;
-      state.carry[slot] = null;
+      matches.forEach(({trayIndex,orderIndex})=>{
+        table.served[orderIndex] = true;
+        state.carry[trayIndex] = null;
+      });
+
       state.selectedCarrySlot = null;
       beep(860);
+
       if(table.served.every(Boolean)){
         table.state = "eating";
         table.eatingUntil = clock()+3900+Math.random()*1400;
         toast(`Table ${table.id} has everything.`);
       } else {
-        toast(`Table ${table.id} still needs the rest.`);
+        toast(`Served ${matches.length} item${matches.length===1?"":"s"}. Table ${table.id} still needs the rest.`);
       }
     }, 470);
     return;
@@ -578,16 +608,69 @@ function burgerCanAssemble(slot){ return slot.bun && slot.patty; }
 function burgerToppingsFromSlot(slot){
   return Object.keys(TOPPINGS).filter(t=>slot[t]);
 }
+function findPrepForPart(part){
+  const preferredIndex = state.selectedBurgerSlot;
+  const preferred = state.burgerSlots[preferredIndex];
+
+  if(preferred && !preferred[part]){
+    return {slot:preferred,index:preferredIndex};
+  }
+
+  const fallbackIndex = state.burgerSlots.findIndex((slot,index)=>
+    index!==preferredIndex && !slot[part]
+  );
+
+  if(fallbackIndex<0) return null;
+  return {slot:state.burgerSlots[fallbackIndex],index:fallbackIndex};
+}
+
 function addBurgerPart(part){
-  const slot = selectedBurger();
-  if(slot[part]){ toast(`That burger already has ${part}.`); return; }
+  const destination = findPrepForPart(part);
+
+  if(!destination){
+    toast(`Both prep plates already have ${part}.`);
+    return;
+  }
+
   const pos = STATION_POS[part];
   moveWorker("cook", pos.x-2, pos.y+1, `Add ${part}`, ()=>{
-    slot[part] = true;
+    destination.slot[part] = true;
+    state.selectedBurgerSlot = destination.index;
     beep(610);
-    toast(`${part[0].toUpperCase()+part.slice(1)} added to burger ${state.selectedBurgerSlot+1}.`);
+    toast(`${part[0].toUpperCase()+part.slice(1)} added to Prep ${destination.index+1}.`);
   }, 320);
 }
+function prepSlotHasAnything(slot){
+  return Boolean(slot.bun || slot.patty || slot.lettuce || slot.tomato);
+}
+
+function prepWasteCost(slot){
+  return Object.entries(PREP_WASTE_COSTS)
+    .reduce((total,[part,cost])=>total+(slot[part]?cost:0),0);
+}
+
+function discardPrep(index){
+  if(!state.running) return;
+
+  const slot = state.burgerSlots[index];
+  if(!slot || !prepSlotHasAnything(slot)){
+    toast(`Prep ${index+1} is already empty.`);
+    return;
+  }
+
+  const cost = prepWasteCost(slot);
+  state.cash -= cost;
+  state.burgerSlots[index] = blankBurgerSlot();
+
+  if(state.selectedBurgerSlot===index){
+    state.selectedBurgerSlot = index===0 ? 1 : 0;
+  }
+
+  beep(220,.09);
+  toast(`Prep ${index+1} cleared. -$${cost} food waste.`);
+  render();
+}
+
 function onBurgerSlotTap(index){
   if(!state.running) return;
   state.selectedBurgerSlot = index;
@@ -605,6 +688,10 @@ function onBurgerSlotTap(index){
     renderBurgerPrep();
   }
 }
+function findAvailablePrepForPatty(){
+  return findPrepForPart("patty");
+}
+
 function onGrillTap(){
   if(!state.running) return;
   const g=state.grill, pos=STATION_POS.grill;
@@ -616,12 +703,21 @@ function onGrillTap(){
   }
   if(g.state==="cooking"){ toast("Patty is still cooking."); return; }
   if(g.state==="ready"){
-    const slot = selectedBurger();
-    if(slot.patty){ toast("Selected prep already has a patty."); return; }
+    const destination = findAvailablePrepForPatty();
+    if(!destination){
+      toast("Both burger prep plates already have patties.");
+      return;
+    }
+
     moveWorker("cook", pos.x-2, pos.y+1, "Move patty", ()=>{
-      slot.patty=true; g.state="idle"; g.startedAt=g.readyAt=g.burnAt=0;
-      beep(880); toast(`Patty added to burger ${state.selectedBurgerSlot+1}.`);
-    }, 330); return;
+      destination.slot.patty = true;
+      state.selectedBurgerSlot = destination.index;
+      g.state="idle";
+      g.startedAt=g.readyAt=g.burnAt=0;
+      beep(880);
+      toast(`Patty moved to Prep ${destination.index+1}.`);
+    }, 330);
+    return;
   }
   if(g.state==="burned"){
     moveWorker("cook", pos.x-2, pos.y+1, "Toss patty", ()=>{
@@ -757,7 +853,7 @@ function onPassItemTap(id){
   moveWorker("server", 66, 61, "Picking up", ()=>{
     state.pass.splice(index,1);
     state.carry[emptySlot] = item;
-    state.selectedCarrySlot = emptySlot;
+    state.selectedCarrySlot = null;
     beep(810);
     toast(`${preparedDescription(item)} is on the tray.`);
   }, 480);
@@ -1014,17 +1110,34 @@ function renderBurgerPrep(){
   if(!show) return;
 
   els.burgerPrepSlots.innerHTML="";
+
   state.burgerSlots.forEach((slot,i)=>{
-    const btn=document.createElement("button");
-    btn.className=`prep-slot ${state.selectedBurgerSlot===i?"selected":""} ${burgerCanAssemble(slot)?"ready":""}`;
-    btn.innerHTML = `
-      ${burgerVisualHTML(burgerToppingsFromSlot(slot), "large", slot)}
-      <div class="prep-plate"></div>
-      <div class="prep-name">PREP ${i+1}</div>
-      <div class="prep-note">${burgerCanAssemble(slot) ? "Tap to assemble" : "Select this prep plate"}</div>
+    const wrapper = document.createElement("div");
+    const hasFood = prepSlotHasAnything(slot);
+    const wasteCost = prepWasteCost(slot);
+
+    wrapper.className=`prep-slot ${state.selectedBurgerSlot===i?"selected":""} ${burgerCanAssemble(slot)?"ready":""}`;
+
+    wrapper.innerHTML = `
+      <button class="prep-main" type="button" aria-label="Prep ${i+1}">
+        ${burgerVisualHTML(burgerToppingsFromSlot(slot), "large", slot)}
+        <div class="prep-plate"></div>
+        <div class="prep-name">PREP ${i+1}</div>
+        <div class="prep-note">${burgerCanAssemble(slot) ? "Tap to assemble" : "Tap to make active"}</div>
+      </button>
+      ${hasFood ? `<button class="prep-discard" type="button" aria-label="Discard Prep ${i+1}">🗑️ $${wasteCost}</button>` : ""}
     `;
-    btn.addEventListener("click", ()=>onBurgerSlotTap(i));
-    els.burgerPrepSlots.appendChild(btn);
+
+    wrapper.querySelector(".prep-main")
+      .addEventListener("click", ()=>onBurgerSlotTap(i));
+
+    wrapper.querySelector(".prep-discard")
+      ?.addEventListener("click", event=>{
+        event.stopPropagation();
+        discardPrep(i);
+      });
+
+    els.burgerPrepSlots.appendChild(wrapper);
   });
 }
 
@@ -1068,7 +1181,7 @@ function renderCarry(){
     const item = state.carry[i];
     btn.innerHTML = item ? itemVisualHTML(item) : "—";
     btn.setAttribute("aria-label", item ? preparedDescription(item) : `Empty tray slot ${i+1}`);
-    btn.classList.toggle("selected", state.selectedCarrySlot===i);
+    btn.classList.remove("selected");
   });
 }
 
@@ -1082,7 +1195,6 @@ function renderWorkers(){
 }
 function patienceColor(pct){ if(pct>55) return "#5d9869"; if(pct>27) return "#e2a53d"; return "#b44136"; }
 
-els.carrySlots.forEach((btn,i)=> btn.addEventListener("click", ()=>onCarryTap(i)));
 els.settingsButton.addEventListener("click", showSettingsMenu);
 els.pauseButton.addEventListener("click", showPauseMenu);
 window.addEventListener("orientationchange", ()=>setTimeout(handleOrientationChange,80));
